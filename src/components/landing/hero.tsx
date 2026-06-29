@@ -24,12 +24,21 @@ export function Hero({ brands, modelsByBrand }: HeroProps) {
       {/* Background layers — pure CSS automotive "road to Germany" scene.  */}
       {/* ---------------------------------------------------------------- */}
       <div className="pointer-events-none absolute inset-0">
-        {/* TODO: hero video/image here — drop a full-bleed muted autoplay loop:
-            <video className="absolute inset-0 h-full w-full object-cover opacity-40"
-                   autoPlay muted loop playsInline poster="/hero-poster.jpg">
-              <source src="/hero.mp4" type="video/mp4" />
-            </video>
-            Keep the gradient/grid layers below as overlay for legibility. */}
+        {/* Full-bleed muted autoplay loop — cars rolling in & lighting up.
+            Gradient/grid layers below render on top for legibility. */}
+        <video
+          className="absolute inset-0 h-full w-full object-cover opacity-45"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster="/hero-poster.jpg"
+          aria-hidden="true"
+        >
+          <source src="/hero.webm" type="video/webm" />
+          <source src="/hero.mp4" type="video/mp4" />
+        </video>
 
         {/* Base radial glows: headlights on the horizon. */}
         <div
