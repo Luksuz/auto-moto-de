@@ -1,5 +1,13 @@
+import fs from "node:fs";
 import path from "node:path";
-process.loadEnvFile?.(path.join(process.cwd(), ".env"));
+const seedEnvPath = path.join(process.cwd(), ".env");
+if (fs.existsSync(seedEnvPath)) {
+  try {
+    process.loadEnvFile?.(seedEnvPath);
+  } catch {
+    // ignore — env already provided by the platform
+  }
+}
 
 import { PrismaClient, Prisma } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
