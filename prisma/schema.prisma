@@ -1,0 +1,189 @@
+// KupiAuto.de — Prisma schema
+// Postgres on Railway. Run: npx prisma migrate dev
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  AGENT
+}
+
+enum BodyType {
+  LIMUZINA // Limousine / sedan
+  KARAVAN // Estate
+  SUV
+  MONOVOLUMEN // MPV / van
+  MALI_AUTO // Small car
+  COUPE
+  KABRIOLET
+  TERENAC // Off-road
+  PICKUP
+}
+
+enum FuelType {
+  DIESEL
+  BENZIN
+  HYBRID
+  ELEKTRICNI
+  PLIN // LPG/CNG
+}
+
+enum Transmission {
+  AUTOMATSKI
+  MANUALNI
+}
+
+enum PriceRating {
+  SEHR_GUTER // Sehr guter Preis
+  GUTER // Guter Preis
+  FAIRER // Fairer Preis
+}
+
+enum LeadType {
+  CONTACT
+  FINANCING
+  VIEWING
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+enum FeedbackStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(AGENT)
+  phone        String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  assignedCars Car[] @relation("AgentCars")
+}
+
+model Car {
+  id        String  @id @default(cuid())
+  slug      String  @unique
+  title     String
+  brand     String
+  model     String
+  published Boolean @default(false)
+  featured  Boolean @default(false)
+
+  // Pricing
+  priceEur    Int
+  priceRating PriceRating?
+
+  // Tehnički detalji
+  bodyType         BodyType
+  firstRegistration String // "MM/YYYY"
+  mileageKm        Int
+  fuelType         FuelType
+  powerKw          Int
+  powerKs          Int
+  transmission     Transmission
+  engineCcm        Int?
+  doors            String? // e.g. "4/5"
+  seats            Int?
+  airConditioning  String? // e.g. "Automatska, 2 zone"
+  parkingSensors   String? // e.g. "Kamera, Prednji, Straznji"
+  tuv              String? // "TÜV do"
+  emissionClass    String? // "Euro 6"
+  origin           String? // "EU porijeklo"
+  previousOwners   Int?
+
+  // Rich text
+  description   String? @db.Text
+  warranty      String? @db.Text // Garancija
+  originDetails String? @db.Text // Porijeklo vozila
+
+  // Oprema (equipment list)
+  equipment String[]
+
+  // Relations
+  images        CarImage[]
+  leads         Lead[]
+  assignedAgent User?      @relation("AgentCars", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  assignedAgentId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([brand])
+  @@index([published])
+  @@index([featured])
+  @@index([priceEur])
+}
+
+model CarImage {
+  id        String  @id @default(cuid())
+  car       Car     @relation(fields: [carId], references: [id], onDelete: Cascade)
+  carId     String
+  url       String
+  key       String // MinIO object key (for deletion)
+  alt       String?
+  sortOrder Int     @default(0)
+  isPrimary Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([carId])
+}
+
+model Lead {
+  id        String     @id @default(cuid())
+  car       Car?       @relation(fields: [carId], references: [id], onDelete: SetNull)
+  carId     String?
+  name      String
+  phone     String
+  email     String?
+  message   String?    @db.Text
+  type      LeadType   @default(CONTACT)
+  status    LeadStatus @default(NEW)
+  createdAt DateTime   @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Temporary dev <-> client feedback board (to-do / in progress / done + comments)
+model FeedbackItem {
+  id        String            @id @default(cuid())
+  title     String
+  body      String?           @db.Text
+  status    FeedbackStatus    @default(TODO)
+  author    String            @default("Klijent")
+  pageUrl   String?
+  order     Int               @default(0)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  comments  FeedbackComment[]
+
+  @@index([status])
+}
+
+model FeedbackComment {
+  id        String       @id @default(cuid())
+  item      FeedbackItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId    String
+  author    String       @default("Klijent")
+  body      String       @db.Text
+  createdAt DateTime     @default(now())
+
+  @@index([itemId])
+}

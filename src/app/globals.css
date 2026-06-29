@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+/* ----------------------------------------------------------------------------
+   KupiAuto.de design tokens
+   Premium automotive palette: midnight navy + electric blue + amber accents.
+---------------------------------------------------------------------------- */
+:root {
+  --background: #f7f8fa;
+  --surface: #ffffff;
+  --surface-2: #f1f3f7;
+  --foreground: #0c1622;
+  --muted: #5b6675;
+  --border: #e3e7ee;
+
+  --navy: #0a1a2f;
+  --navy-700: #102a4c;
+  --navy-600: #16365f;
+
+  --primary: #1652f0; /* electric blue */
+  --primary-600: #0f3fc4;
+  --primary-foreground: #ffffff;
+
+  --accent: #ff7a00; /* amber/orange CTA */
+  --accent-600: #e06800;
+  --accent-foreground: #ffffff;
+
+  --success: #16a34a;
+  --rating: #1f9d55;
+
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+
+  --color-navy: var(--navy);
+  --color-navy-700: var(--navy-700);
+  --color-navy-600: var(--navy-600);
+
+  --color-primary: var(--primary);
+  --color-primary-600: var(--primary-600);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-600: var(--accent-600);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-success: var(--success);
+  --color-rating: var(--rating);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.35rem);
+  --radius-2xl: calc(var(--radius) + 0.75rem);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Utility: hide scrollbar for carousels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out both;
+}
