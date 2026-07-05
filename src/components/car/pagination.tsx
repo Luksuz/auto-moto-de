@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PaginationProps {
@@ -7,6 +6,8 @@ interface PaginationProps {
   pages: number;
   /** Current search params (without `page`) to preserve in links. */
   params: Record<string, string | undefined>;
+  prevLabel?: string;
+  nextLabel?: string;
 }
 
 function buildHref(params: Record<string, string | undefined>, page: number) {
@@ -35,7 +36,16 @@ function pageList(page: number, pages: number): (number | "...")[] {
   return out;
 }
 
-export function Pagination({ page, pages, params }: PaginationProps) {
+const CELL =
+  "grid size-10 place-items-center border text-sm font-semibold transition-colors";
+
+export function Pagination({
+  page,
+  pages,
+  params,
+  prevLabel = "Prethodna stranica",
+  nextLabel = "Sljedeća stranica",
+}: PaginationProps) {
   if (pages <= 1) return null;
 
   const items = pageList(page, pages);
@@ -48,14 +58,19 @@ export function Pagination({ page, pages, params }: PaginationProps) {
       {page > 1 ? (
         <Link
           href={buildHref(params, page - 1)}
-          className="grid size-10 place-items-center rounded-lg border border-border bg-surface text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
-          aria-label="Prethodna stranica"
+          className={cn(
+            CELL,
+            "border-border-strong bg-surface text-foreground hover:border-primary",
+          )}
+          aria-label={prevLabel}
         >
-          <ChevronLeft className="size-4" />
+          ←
         </Link>
       ) : (
-        <span className="grid size-10 place-items-center rounded-lg border border-border bg-surface-2 text-muted/40">
-          <ChevronLeft className="size-4" />
+        <span
+          className={cn(CELL, "border-border-strong bg-surface text-muted-2/50")}
+        >
+          ←
         </span>
       )}
 
@@ -63,7 +78,7 @@ export function Pagination({ page, pages, params }: PaginationProps) {
         it === "..." ? (
           <span
             key={`gap-${i}`}
-            className="grid size-10 place-items-center text-muted"
+            className="grid size-10 place-items-center text-muted-2"
           >
             …
           </span>
@@ -73,10 +88,10 @@ export function Pagination({ page, pages, params }: PaginationProps) {
             href={buildHref(params, it)}
             aria-current={it === page ? "page" : undefined}
             className={cn(
-              "grid size-10 place-items-center rounded-lg border text-sm font-semibold transition-colors",
+              CELL,
               it === page
                 ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-surface text-foreground hover:bg-surface-2",
+                : "border-border-strong bg-surface text-foreground hover:border-primary",
             )}
           >
             {it}
@@ -87,14 +102,19 @@ export function Pagination({ page, pages, params }: PaginationProps) {
       {page < pages ? (
         <Link
           href={buildHref(params, page + 1)}
-          className="grid size-10 place-items-center rounded-lg border border-border bg-surface text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
-          aria-label="Sljedeća stranica"
+          className={cn(
+            CELL,
+            "border-border-strong bg-surface text-foreground hover:border-primary",
+          )}
+          aria-label={nextLabel}
         >
-          <ChevronRight className="size-4" />
+          →
         </Link>
       ) : (
-        <span className="grid size-10 place-items-center rounded-lg border border-border bg-surface-2 text-muted/40">
-          <ChevronRight className="size-4" />
+        <span
+          className={cn(CELL, "border-border-strong bg-surface text-muted-2/50")}
+        >
+          →
         </span>
       )}
     </nav>

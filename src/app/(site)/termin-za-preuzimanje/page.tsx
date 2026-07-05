@@ -1,53 +1,72 @@
 import type { Metadata } from "next";
-import { Phone, Clock, MapPin } from "lucide-react";
+import { Phone, Mail, Users } from "lucide-react";
 import { LeadForm } from "@/components/site/lead-form";
 import { Button } from "@/components/ui/button";
-import { DEALER } from "@/lib/constants";
+import { DEALER, whatsappLink } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Termin za preuzimanje — KupiAuto.de",
+  title: "Termin za preuzimanje — AUTOCAR EU",
   description:
-    "Dogovorite termin za preuzimanje vozila u našem salonu — KupiAuto.de (LON CARS).",
+    "Dogovorite termin za preuzimanje vozila — AUTOCAR EU.",
 };
 
 export default function TerminZaPreuzimanjePage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-      <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+    <div className="mx-auto max-w-3xl px-5 py-12 sm:px-10 lg:px-14 lg:py-16">
+      <h1 className="font-display text-[clamp(28px,6vw,40px)] font-semibold uppercase text-foreground">
         Termin za preuzimanje
       </h1>
       <p className="mt-4 text-lg leading-relaxed text-muted">
         Nakon odobrenja financiranja i pripreme dokumentacije, dogovaramo termin
-        za preuzimanje vozila u našem salonu. Javite nam se kako bismo odabrali
-        termin koji vam najviše odgovara.
+        za preuzimanje vozila. Javite nam se kako bismo odabrali termin koji vam
+        najviše odgovara.
       </p>
 
-      <section className="mt-10 rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
-        <h2 className="text-xl font-bold text-foreground">Lokacija salona</h2>
+      <section className="mt-10 border border-border bg-surface p-6 sm:p-8">
+        <h2 className="font-display text-xl font-semibold uppercase tracking-[1px] text-foreground">
+          Kontakt
+        </h2>
         <ul className="mt-4 space-y-3 text-sm">
-          <li className="flex items-start gap-2.5">
-            <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-            <span className="text-foreground/90">
-              {DEALER.legalName}
-              <br />
-              {DEALER.street}, {DEALER.city}
-            </span>
-          </li>
-          <li className="flex items-start gap-2.5">
-            <Clock className="mt-0.5 size-4 shrink-0 text-primary" />
-            <span className="text-foreground/90">
-              Pon–Pet: {DEALER.hoursWeek}
-              <br />
-              Sub: {DEALER.hoursSat}
-            </span>
+          <li className="flex items-center gap-2.5">
+            <Phone className="size-4 shrink-0 text-primary" />
+            <a
+              href={whatsappLink(undefined, DEALER.whatsappDe)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-foreground hover:text-primary"
+            >
+              WhatsApp DE {DEALER.whatsappDePretty}
+            </a>
           </li>
           <li className="flex items-center gap-2.5">
             <Phone className="size-4 shrink-0 text-primary" />
             <a
-              href={`tel:${DEALER.phoneHref}`}
+              href={whatsappLink(undefined, DEALER.whatsappHr)}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-foreground hover:text-primary"
             >
-              {DEALER.phone}
+              WhatsApp HR {DEALER.whatsappHrPretty}
+            </a>
+          </li>
+          <li className="flex items-center gap-2.5">
+            <Mail className="size-4 shrink-0 text-primary" />
+            <a
+              href={`mailto:${DEALER.email}`}
+              className="font-medium text-foreground hover:text-primary"
+            >
+              {DEALER.email}
+            </a>
+          </li>
+          <li className="flex items-center gap-2.5">
+            <Users className="size-4 shrink-0 text-primary" />
+            <a
+              href={DEALER.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-foreground hover:text-primary"
+            >
+              Facebook grupa — AUTOCAR EU
             </a>
           </li>
         </ul>
@@ -57,11 +76,18 @@ export default function TerminZaPreuzimanjePage() {
         <LeadForm
           type="VIEWING"
           triggerLabel="Zakaži termin"
-          triggerVariant="accent"
+          triggerVariant="primary"
           triggerSize="lg"
         />
-        <Button asChild variant="outline" size="lg">
-          <a href={`tel:${DEALER.phoneHref}`}>Nazovi: {DEALER.phone}</a>
+        <Button asChild variant="whatsapp" size="lg">
+          <a
+            href={whatsappLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Phone className="size-4" />
+            WhatsApp {DEALER.whatsappDePretty}
+          </a>
         </Button>
       </div>
     </div>

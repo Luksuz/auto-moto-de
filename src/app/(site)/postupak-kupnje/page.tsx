@@ -5,12 +5,13 @@ import {
   FileText,
   KeyRound,
   Check,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DEALER, FINANCING } from "@/lib/constants";
+import { DEALER, FINANCING, whatsappLink } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Postupak kupnje — KupiAuto.de",
+  title: "Postupak kupnje — AUTOCAR EU",
   description:
     "Tri jednostavna koraka do vašeg vozila: informativni razgovor, online zahtjev za financiranjem i preuzimanje vozila.",
 };
@@ -19,7 +20,7 @@ const STEPS = [
   {
     icon: MessageSquare,
     title: "Informativni razgovor",
-    text: "Odaberete vozilo koje vas zanima i javite nam se telefonom, putem WhatsAppa ili obrasca. Odgovaramo na sva pitanja, dogovaramo detalje i provjeravamo dostupnost vozila.",
+    text: "Odaberete vozilo koje vas zanima i javite nam se putem WhatsAppa ili obrasca. Odgovaramo na sva pitanja, dogovaramo detalje i provjeravamo dostupnost vozila.",
     bullets: [
       "Pregled dostupnih vozila i specifikacija",
       "Provjera mogućnosti financiranja",
@@ -41,23 +42,23 @@ const STEPS = [
   {
     icon: KeyRound,
     title: "Prijepis i preuzimanje vozila",
-    text: "Nakon odobrenja organiziramo osiguranje i registraciju vozila. Vozilo preuzimate u našem salonu spremno za vožnju.",
+    text: "Nakon odobrenja organiziramo osiguranje i registraciju vozila. Vozilo preuzimate spremno za vožnju.",
     bullets: [
       "Ugovaranje osiguranja (Kasko + obavezno)",
       "Registracija vozila (Kfz-Zulassung)",
-      "Dolazak u salon i preuzimanje ključeva",
+      "Dogovor termina i preuzimanje ključeva",
     ],
   },
 ];
 
 export default function PostupakKupnjePage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+    <div className="mx-auto max-w-4xl px-5 py-12 sm:px-10 lg:px-14 lg:py-16">
       <header className="max-w-2xl">
-        <p className="text-sm font-semibold uppercase tracking-wide text-primary">
+        <p className="font-display text-[12px] uppercase tracking-[4px] text-primary">
           Postupak kupnje
         </p>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+        <h1 className="mt-2 font-display text-[clamp(28px,6vw,40px)] font-semibold uppercase text-foreground">
           Do vašeg vozila u 3 koraka
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted">
@@ -72,11 +73,11 @@ export default function PostupakKupnjePage() {
           return (
             <li
               key={step.title}
-              className="relative rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8"
+              className="relative border border-border bg-surface p-6 sm:p-8"
             >
               <div className="flex flex-col gap-5 sm:flex-row">
                 <div className="flex shrink-0 items-start gap-4">
-                  <span className="grid size-12 place-items-center rounded-xl bg-primary text-lg font-extrabold text-primary-foreground">
+                  <span className="grid size-12 place-items-center bg-primary font-display text-lg font-semibold text-primary-foreground">
                     {i + 1}
                   </span>
                   <Icon className="mt-2.5 size-6 text-primary sm:hidden" />
@@ -84,7 +85,7 @@ export default function PostupakKupnjePage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <Icon className="hidden size-5 text-primary sm:block" />
-                    <h2 className="text-xl font-bold text-foreground">
+                    <h2 className="font-display text-xl font-semibold uppercase tracking-[1px] text-foreground">
                       {step.title}
                     </h2>
                   </div>
@@ -97,7 +98,7 @@ export default function PostupakKupnjePage() {
                         key={b}
                         className="flex items-start gap-2 text-sm text-foreground"
                       >
-                        <Check className="mt-0.5 size-4 shrink-0 text-success" />
+                        <Check className="mt-0.5 size-4 shrink-0 text-primary" />
                         <span>{b}</span>
                       </li>
                     ))}
@@ -109,7 +110,7 @@ export default function PostupakKupnjePage() {
         })}
       </ol>
 
-      <div className="mt-12 rounded-2xl border border-border bg-surface-2 p-6 text-sm text-muted">
+      <div className="mt-12 border border-border bg-surface-2 p-6 text-sm text-muted">
         <p>
           Odobrenje financiranja u pravilu dobivate unutar{" "}
           {FINANCING.approvalHours} sata. Za sva pitanja stojimo vam na
@@ -118,11 +119,18 @@ export default function PostupakKupnjePage() {
       </div>
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <Button asChild variant="accent" size="lg">
+        <Button asChild variant="primary" size="lg">
           <Link href="/uvjeti-financiranja">Uvjeti financiranja</Link>
         </Button>
-        <Button asChild variant="outline" size="lg">
-          <a href={`tel:${DEALER.phoneHref}`}>Nazovi: {DEALER.phone}</a>
+        <Button asChild variant="whatsapp" size="lg">
+          <a
+            href={whatsappLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Phone className="size-4" />
+            WhatsApp {DEALER.whatsappDePretty}
+          </a>
         </Button>
       </div>
     </div>

@@ -13,9 +13,11 @@ interface GalleryImage {
 export function CarGallery({
   images,
   title,
+  emptyLabel = "Nema dostupnih fotografija",
 }: {
   images: GalleryImage[];
   title: string;
+  emptyLabel?: string;
 }) {
   const [active, setActive] = React.useState(0);
   const stripRef = React.useRef<HTMLDivElement>(null);
@@ -41,10 +43,10 @@ export function CarGallery({
 
   if (!hasImages) {
     return (
-      <div className="flex aspect-[4/3] w-full items-center justify-center rounded-2xl border border-border bg-surface-2 text-muted">
+      <div className="flex aspect-[16/10] w-full items-center justify-center border border-border bg-surface-2 text-muted">
         <div className="flex flex-col items-center gap-2">
           <ImageOff className="size-12" />
-          <span className="text-sm">Nema dostupnih fotografija</span>
+          <span className="text-sm">{emptyLabel}</span>
         </div>
       </div>
     );
@@ -53,8 +55,8 @@ export function CarGallery({
   const current = images[active];
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border bg-surface-2">
+    <div>
+      <div className="group relative aspect-[16/10] w-full overflow-hidden border border-border bg-surface-2">
         <Image
           key={current.url}
           src={current.url}
@@ -71,7 +73,7 @@ export function CarGallery({
               type="button"
               onClick={() => go(-1)}
               aria-label="Prethodna fotografija"
-              className="absolute left-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-navy/60 text-white backdrop-blur transition-colors hover:bg-navy/80"
+              className="absolute left-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center border border-border-strong bg-background/70 text-foreground backdrop-blur transition-colors hover:border-primary hover:text-primary"
             >
               <ChevronLeft className="size-5" />
             </button>
@@ -79,11 +81,11 @@ export function CarGallery({
               type="button"
               onClick={() => go(1)}
               aria-label="Sljedeća fotografija"
-              className="absolute right-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-navy/60 text-white backdrop-blur transition-colors hover:bg-navy/80"
+              className="absolute right-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center border border-border-strong bg-background/70 text-foreground backdrop-blur transition-colors hover:border-primary hover:text-primary"
             >
               <ChevronRight className="size-5" />
             </button>
-            <div className="absolute bottom-3 right-3 rounded-full bg-navy/70 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
+            <div className="absolute bottom-3 right-3 border border-border-strong bg-background/70 px-2.5 py-1 text-xs font-medium text-foreground backdrop-blur">
               {active + 1} / {images.length}
             </div>
           </>
@@ -91,10 +93,7 @@ export function CarGallery({
       </div>
 
       {images.length > 1 && (
-        <div
-          ref={stripRef}
-          className="no-scrollbar flex gap-2.5 overflow-x-auto pb-1"
-        >
+        <div ref={stripRef} className="mt-3 grid grid-cols-4 gap-3">
           {images.map((img, i) => (
             <button
               key={img.url + i}
@@ -103,17 +102,17 @@ export function CarGallery({
               onClick={() => setActive(i)}
               aria-label={`Fotografija ${i + 1}`}
               className={cn(
-                "relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-lg border-2 transition-all",
+                "relative h-24 w-full overflow-hidden border transition-colors",
                 i === active
                   ? "border-primary"
-                  : "border-transparent opacity-70 hover:opacity-100",
+                  : "border-border opacity-80 hover:opacity-100 hover:border-primary",
               )}
             >
               <Image
                 src={img.url}
                 alt={img.alt || `${title} — fotografija ${i + 1}`}
                 fill
-                sizes="96px"
+                sizes="(max-width: 1024px) 25vw, 180px"
                 className="object-cover"
               />
             </button>

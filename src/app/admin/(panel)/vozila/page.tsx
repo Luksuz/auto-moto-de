@@ -39,10 +39,19 @@ export default async function VozilaPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Vozila</h1>
+          <div className="mb-2 font-display text-[12px] uppercase tracking-[4px] text-primary">
+            Administracija
+          </div>
+          <h1 className="font-display text-2xl font-semibold uppercase">
+            Vozila
+          </h1>
           <p className="text-sm text-muted">{cars.length} vozila</p>
         </div>
-        <Button asChild variant="accent">
+        <Button
+          asChild
+          variant="accent"
+          className="font-display uppercase tracking-[2px]"
+        >
           <Link href="/admin/vozila/novo">
             <Plus className="size-4" />
             Novo vozilo
@@ -69,7 +78,7 @@ export default async function VozilaPage({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-surface-2 text-left text-xs uppercase tracking-wide text-muted">
+                <tr className="border-b border-border bg-surface-2 text-left text-[11px] uppercase tracking-[1.5px] text-muted-2">
                   <th className="px-4 py-3 font-semibold">Vozilo</th>
                   <th className="px-4 py-3 font-semibold">Cijena</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
@@ -84,7 +93,7 @@ export default async function VozilaPage({
                     <tr key={car.id} className="hover:bg-surface-2/50">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="relative size-12 shrink-0 overflow-hidden rounded-md bg-surface-2">
+                          <div className="relative size-12 shrink-0 overflow-hidden border border-border bg-surface-2">
                             {img && (
                               <Image
                                 src={img}
@@ -103,7 +112,7 @@ export default async function VozilaPage({
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap font-medium">
+                      <td className="px-4 py-3 whitespace-nowrap font-display text-primary">
                         {formatPrice(car.priceEur)}
                       </td>
                       <td className="px-4 py-3">

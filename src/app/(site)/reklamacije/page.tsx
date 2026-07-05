@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import { Phone, Mail } from "lucide-react";
-import { DEALER } from "@/lib/constants";
+import { DEALER, whatsappLink } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Reklamacije — KupiAuto.de",
+  title: "Reklamacije — AUTOCAR EU",
   description:
-    "Kako podnijeti reklamaciju i kontakt za prigovore — KupiAuto.de (LON CARS).",
+    "Kako podnijeti reklamaciju i kontakt za prigovore — AUTOCAR EU.",
 };
 
 export default function ReklamacijePage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-      <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+    <div className="mx-auto max-w-3xl px-5 py-12 sm:px-10 lg:px-14 lg:py-16">
+      <h1 className="font-display text-[clamp(28px,6vw,40px)] font-semibold uppercase text-foreground">
         Reklamacije
       </h1>
       <p className="mt-4 text-lg leading-relaxed text-muted">
@@ -21,10 +21,12 @@ export default function ReklamacijePage() {
       </p>
 
       <section className="mt-10 space-y-4 text-sm leading-relaxed text-foreground/90">
-        <h2 className="text-xl font-bold text-foreground">Kako podnijeti reklamaciju</h2>
+        <h2 className="font-display text-xl font-semibold uppercase tracking-[1px] text-foreground">
+          Kako podnijeti reklamaciju
+        </h2>
         <ol className="list-decimal space-y-2 pl-5">
           <li>
-            Kontaktirajte nas telefonom ili e-mailom i opišite problem.
+            Kontaktirajte nas putem WhatsAppa ili e-mailom i opišite problem.
           </li>
           <li>
             Navedite podatke o vozilu (marka, model, broj šasije) i datum
@@ -41,18 +43,31 @@ export default function ReklamacijePage() {
         </ol>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-border bg-surface p-6 shadow-sm">
-        <h2 className="text-base font-bold text-foreground">
+      <section className="mt-10 border border-border bg-surface p-6">
+        <h2 className="font-display text-base font-semibold uppercase tracking-[1px] text-foreground">
           Kontakt za reklamacije
         </h2>
         <ul className="mt-4 space-y-3 text-sm">
           <li className="flex items-center gap-2.5">
             <Phone className="size-4 shrink-0 text-primary" />
             <a
-              href={`tel:${DEALER.phoneHref}`}
+              href={whatsappLink(undefined, DEALER.whatsappDe)}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-foreground hover:text-primary"
             >
-              {DEALER.phone}
+              WhatsApp DE {DEALER.whatsappDePretty}
+            </a>
+          </li>
+          <li className="flex items-center gap-2.5">
+            <Phone className="size-4 shrink-0 text-primary" />
+            <a
+              href={whatsappLink(undefined, DEALER.whatsappHr)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-foreground hover:text-primary"
+            >
+              WhatsApp HR {DEALER.whatsappHrPretty}
             </a>
           </li>
           <li className="flex items-center gap-2.5">
@@ -65,9 +80,7 @@ export default function ReklamacijePage() {
             </a>
           </li>
         </ul>
-        <p className="mt-4 text-sm text-muted">
-          {DEALER.legalName}, {DEALER.street}, {DEALER.city}
-        </p>
+        <p className="mt-4 text-sm text-muted">{DEALER.name}</p>
       </section>
     </div>
   );

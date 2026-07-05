@@ -52,7 +52,14 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight">Pregled</h1>
+      <div>
+        <div className="mb-2 font-display text-[12px] uppercase tracking-[4px] text-primary">
+          Administracija
+        </div>
+        <h1 className="font-display text-2xl font-semibold uppercase">
+          Pregled
+        </h1>
+      </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((s) => {
@@ -64,8 +71,12 @@ export default async function DashboardPage() {
                   <Icon className="size-5" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{s.value}</div>
-                  <div className="text-xs text-muted">{s.label}</div>
+                  <div className="font-display text-2xl font-semibold">
+                    {s.value}
+                  </div>
+                  <div className="text-[11px] uppercase tracking-[1.5px] text-muted-2">
+                    {s.label}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -76,10 +87,12 @@ export default async function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader className="flex items-center justify-between">
-            <CardTitle>Najnoviji upiti</CardTitle>
+            <CardTitle className="font-display text-base uppercase tracking-[2px]">
+              Najnoviji upiti
+            </CardTitle>
             <Link
               href="/admin/leads"
-              className="text-sm font-medium text-primary hover:underline"
+              className="font-display text-[12px] uppercase tracking-[2px] text-primary hover:underline"
             >
               Svi upiti
             </Link>
@@ -115,10 +128,12 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader className="flex items-center justify-between">
-            <CardTitle>Najnovija vozila</CardTitle>
+            <CardTitle className="font-display text-base uppercase tracking-[2px]">
+              Najnovija vozila
+            </CardTitle>
             <Link
               href="/admin/vozila"
-              className="text-sm font-medium text-primary hover:underline"
+              className="font-display text-[12px] uppercase tracking-[2px] text-primary hover:underline"
             >
               Sva vozila
             </Link>
@@ -134,9 +149,9 @@ export default async function DashboardPage() {
                     <li key={car.id}>
                       <Link
                         href={`/admin/vozila/${car.id}`}
-                        className="flex items-center gap-3 px-5 py-3 hover:bg-surface-2"
+                        className="flex items-center gap-3 px-5 py-3 hover:bg-surface-2/50"
                       >
-                        <div className="relative size-12 shrink-0 overflow-hidden rounded-md bg-surface-2">
+                        <div className="relative size-12 shrink-0 overflow-hidden border border-border bg-surface-2">
                           {img && (
                             <Image
                               src={img}
@@ -151,7 +166,7 @@ export default async function DashboardPage() {
                           <div className="truncate text-sm font-medium">
                             {car.title}
                           </div>
-                          <div className="text-xs text-muted">
+                          <div className="font-display text-sm text-primary">
                             {formatPrice(car.priceEur)}
                           </div>
                         </div>

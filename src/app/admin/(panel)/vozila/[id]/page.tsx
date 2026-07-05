@@ -76,14 +76,19 @@ export default async function UrediVoziloPage({
       <div className="flex items-center gap-3">
         <Link
           href="/admin/vozila"
-          className="text-muted hover:text-foreground"
+          className="text-muted hover:text-primary"
           aria-label="Natrag"
         >
           <ArrowLeft className="size-5" />
         </Link>
-        <h1 className="truncate text-2xl font-bold tracking-tight">
-          {car.title}
-        </h1>
+        <div className="min-w-0">
+          <div className="mb-2 font-display text-[12px] uppercase tracking-[4px] text-primary">
+            Uredi vozilo
+          </div>
+          <h1 className="truncate font-display text-2xl font-semibold uppercase">
+            {car.title}
+          </h1>
+        </div>
       </div>
       <CarForm
         carId={car.id}

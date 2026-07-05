@@ -1,104 +1,141 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ShieldCheck, Globe2, Wallet, Handshake } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { DEALER } from "@/lib/constants";
+import { DEALER, whatsappLink } from "@/lib/constants";
+import { getT } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
-  title: "O nama — KupiAuto.de",
+  title: "O nama — AUTOCAR EU",
   description:
-    "KupiAuto.de (LON CARS) — provjerena rabljena vozila iz Njemačke uz transparentnu prodaju i financiranje 100% online.",
+    "AUTOCAR EU — od 2018. prodajemo provjerena vozila iz Njemačke i Austrije. Preko 350 vozila na stanju, garancija do 3 godine i tisuće zadovoljnih kupaca.",
 };
 
-const VALUES = [
-  {
-    icon: Globe2,
-    title: "Vozila s njemačkog tržišta",
-    text: "Sva naša vozila dolaze s njemačkog tržišta — poznate servisne povijesti, uredne dokumentacije i provjerenog stanja.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Provjereno i transparentno",
-    text: "Svako vozilo prolazi tehničku provjeru. Stanje, kilometraža i oprema jasno su navedeni, bez skrivenih iznenađenja.",
-  },
-  {
-    icon: Wallet,
-    title: "Financiranje 100% online",
-    text: "Cijeli postupak financiranja odvija se online — bez učešća, uz odobrenje banke unutar jednog radnog dana.",
-  },
-  {
-    icon: Handshake,
-    title: "Osobni pristup",
-    text: "Pratimo vas od prvog upita do preuzimanja ključeva. Na raspolaganju smo na hrvatskom jeziku za sva pitanja.",
-  },
-];
+export default async function ONamaPage() {
+  const { t } = await getT();
 
-export default function ONamaPage() {
+  const stats: { value: string; label: string; className: string }[] = [
+    {
+      value: "8",
+      label: t.aboutS1,
+      className: "border-r border-b border-border-soft lg:border-b-0",
+    },
+    {
+      value: "350+",
+      label: t.aboutS2,
+      className: "border-b border-border-soft lg:border-b-0 lg:border-r",
+    },
+    {
+      value: `3 ${t.years}`,
+      label: t.aboutS3,
+      className: "border-r border-border-soft",
+    },
+    { value: "1000+", label: t.aboutS4, className: "" },
+  ];
+
+  const values: { num: string; title: string; text: string }[] = [
+    { num: "01", title: t.aboutV1, text: t.aboutV1t },
+    { num: "02", title: t.aboutV2, text: t.aboutV2t },
+    { num: "03", title: t.aboutV3, text: t.aboutV3t },
+  ];
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-      <header className="max-w-2xl">
-        <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-          O nama
-        </p>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-          Vaš partner za rabljena vozila iz Njemačke
+    <div>
+      {/* Hero */}
+      <div className="border-b border-border-soft bg-gradient-to-b from-[#121013] to-background px-5 pt-15 pb-12 text-center sm:px-10 lg:px-14">
+        <div className="mb-3 font-display text-[12px] uppercase tracking-[4px] text-primary">
+          AUTOCAR EU · {t.aboutSince}
+        </div>
+        <h1 className="mb-4 font-display text-[clamp(28px,6.5vw,44px)] font-semibold uppercase">
+          {t.aboutTitle}
         </h1>
-        <p className="mt-4 text-lg leading-relaxed text-muted">
-          {DEALER.name} pod tvrtkom {DEALER.legalName} bavi se prodajom
-          provjerenih rabljenih vozila s njemačkog tržišta. Cilj nam je kupnju
-          automobila učiniti jednostavnom, sigurnom i potpuno transparentnom.
+        <p className="mx-auto max-w-[720px] text-[17.5px] leading-[1.65] text-muted">
+          {t.aboutText}
         </p>
-      </header>
-
-      <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2">
-        {VALUES.map((v) => {
-          const Icon = v.icon;
-          return (
-            <div
-              key={v.title}
-              className="rounded-2xl border border-border bg-surface p-6 shadow-sm"
-            >
-              <div className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary">
-                <Icon className="size-6" />
-              </div>
-              <h2 className="mt-4 text-lg font-bold text-foreground">
-                {v.title}
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{v.text}</p>
-            </div>
-          );
-        })}
       </div>
 
-      <section className="mt-12 space-y-4 text-base leading-relaxed text-foreground/90">
-        <h2 className="text-2xl font-bold text-foreground">Tko smo</h2>
-        <p>
-          Specijalizirani smo za uvoz i prodaju rabljenih vozila iz Njemačke za
-          kupce koji žele pouzdan automobil uz povoljne uvjete financiranja.
-          Svjesni smo da je kupnja automobila važna odluka, pa zato svako vozilo
-          biramo i provjeravamo s pažnjom.
-        </p>
-        <p>
-          Uz prodaju vozila nudimo i kompletnu podršku oko financiranja,
-          osiguranja te prijepisa i registracije vozila — kako biste do svog
-          automobila došli bez stresa i komplikacija.
-        </p>
-      </section>
+      {/* Stats band */}
+      <div className="grid grid-cols-2 border-b border-border-soft lg:grid-cols-4">
+        {stats.map((s) => (
+          <div key={s.label} className={`px-5 py-8 text-center ${s.className}`}>
+            <div className="font-display text-[38px] font-semibold text-primary">
+              {s.value}
+            </div>
+            <div className="mt-1 text-[13px] uppercase tracking-[1.5px] text-muted-2">
+              {s.label}
+            </div>
+          </div>
+        ))}
+      </div>
 
-      <div className="mt-12 flex flex-col gap-3 rounded-2xl bg-navy p-8 text-white sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-xl font-bold">Spremni za svoj novi automobil?</h2>
-          <p className="mt-1 text-white/70">
-            Pregledajte ponudu ili nas kontaktirajte za savjet.
-          </p>
-        </div>
-        <div className="flex shrink-0 gap-3">
-          <Button asChild variant="accent" size="lg">
-            <Link href="/vozila">Pogledaj vozila</Link>
-          </Button>
-          <Button asChild variant="outline" size="lg" className="border-white/20 bg-transparent text-white hover:bg-white/10">
-            <a href={`tel:${DEALER.phoneHref}`}>Nazovi nas</a>
-          </Button>
+      {/* Value cards */}
+      <div className="mx-auto grid max-w-[1240px] grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-[22px] px-5 py-14 sm:px-10 lg:px-14">
+        {values.map((v) => (
+          <div key={v.num} className="border border-border p-7">
+            <div className="font-display text-[30px] font-semibold text-primary">
+              {v.num}
+            </div>
+            <div className="my-2.5 font-display text-[17px] font-semibold uppercase">
+              {v.title}
+            </div>
+            <div className="text-[14.5px] leading-relaxed text-muted-2">
+              {v.text}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA band */}
+      <div className="px-5 sm:px-10 lg:px-14">
+        <div className="mx-auto mb-16 flex max-w-[1128px] flex-wrap items-center justify-between gap-6 border border-primary p-9 px-10">
+          <div>
+            <div className="mb-1.5 font-display text-[24px] font-semibold uppercase">
+              {t.aboutCta}
+            </div>
+            <div className="text-[15px] text-muted-2">
+              {t.aboutCtaT}{" "}
+              <a
+                href={DEALER.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline"
+              >
+                Facebook — AUTOCAR EU
+              </a>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <a
+              href={whatsappLink(undefined, DEALER.whatsappDe)}
+              className="flex flex-col border border-border-strong px-[18px] py-2.5 hover:border-primary"
+            >
+              <span className="text-[11px] uppercase tracking-[1.5px] text-muted-2">
+                WhatsApp DE
+              </span>
+              <span className="font-display text-[17px] text-success">
+                {DEALER.whatsappDePretty}
+              </span>
+            </a>
+            <a
+              href={whatsappLink(undefined, DEALER.whatsappHr)}
+              className="flex flex-col border border-border-strong px-[18px] py-2.5 hover:border-primary"
+            >
+              <span className="text-[11px] uppercase tracking-[1.5px] text-muted-2">
+                WhatsApp HR
+              </span>
+              <span className="font-display text-[17px] text-success">
+                {DEALER.whatsappHrPretty}
+              </span>
+            </a>
+            <a
+              href={`mailto:${DEALER.email}`}
+              className="flex flex-col border border-border-strong px-[18px] py-2.5 hover:border-primary"
+            >
+              <span className="text-[11px] uppercase tracking-[1.5px] text-muted-2">
+                E-mail
+              </span>
+              <span className="font-display text-[17px] text-primary">
+                {DEALER.email}
+              </span>
+            </a>
+          </div>
         </div>
       </div>
     </div>

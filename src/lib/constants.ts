@@ -8,20 +8,31 @@ import type {
   Role,
 } from "@prisma/client";
 
+/** Canonical site origin for metadata/sitemap (no AUTOCAR EU domain provided yet). */
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://kupiauto.de";
+
 /** Dealership / contact info shown across the site. */
 export const DEALER = {
-  name: "KupiAuto.de",
-  legalName: "LON CARS",
-  agent: "Ivan Vidović",
-  phone: "+49 177 4012397",
-  phoneHref: "+491774012397",
-  whatsapp: "491774012397",
-  email: "kontakt@kupiauto.de",
-  web: "www.kupiauto.de",
-  street: "Liebigstr. 27",
-  city: "DE-74211 Leingarten",
-  hoursWeek: "09:00 - 18:00h",
-  hoursSat: "09:00 - 14:00h",
+  name: "AUTOCAR EU",
+  email: "autocareupremium@gmail.com",
+  whatsappDe: "491713682790",
+  whatsappDePretty: "+49 171 3682790",
+  whatsappHr: "385915940692",
+  whatsappHrPretty: "+385 91 594 0692",
+  facebook: "https://www.facebook.com/groups/434685440223423",
+  since: 2018,
+} as const;
+
+/** Insurance advisor featured on /osiguranje. */
+export const INSURANCE_ADVISOR = {
+  name: "Goran Kanjir",
+  company: "Allfinanz Deutsche Vermögensberatung",
+  whatsappDe: "491733121590",
+  whatsappDePretty: "+49 173 312 1590",
+  whatsappAt: "4366499067677",
+  whatsappAtPretty: "+43 664 990 67677",
+  email: "goran.kanjir@allfinanz.ag",
 } as const;
 
 /** Financing headline figures (from uvjeti-financiranja). */
@@ -70,6 +81,8 @@ export const LEAD_TYPE_LABEL: Record<LeadType, string> = {
   CONTACT: "Upit",
   FINANCING: "Financiranje",
   VIEWING: "Razgledavanje",
+  PROBLEM: "Prijava problema",
+  INSURANCE: "Osiguranje",
 };
 
 export const LEAD_STATUS_LABEL: Record<LeadStatus, string> = {
@@ -83,12 +96,24 @@ export const ROLE_LABEL: Record<Role, string> = {
   AGENT: "Agent",
 };
 
-export const NAV_LINKS = [
-  { href: "/", label: "Naslovnica" },
-  { href: "/vozila", label: "Vozila" },
-  { href: "/o-nama", label: "O nama" },
-  { href: "/postupak-kupnje", label: "Postupak kupnje" },
-  { href: "/uvjeti-financiranja", label: "Uvjeti financiranja" },
+/** Main site navigation — labels resolved via the i18n dictionary. */
+export const SITE_NAV = [
+  { key: "navHome", href: "/" },
+  { key: "navCars", href: "/vozila" },
+  { key: "navFinancing", href: "/financiranje" },
+  { key: "navProblem", href: "/prijavi-problem" },
+  { key: "navInsurance", href: "/osiguranje" },
+  { key: "navAbout", href: "/o-nama" },
+] as const;
+
+/** Footer links to the kept informational pages (labels via i18n keys). */
+export const INFO_NAV = [
+  { key: "infoPurchase", href: "/postupak-kupnje" },
+  { key: "infoFinancingTerms", href: "/uvjeti-financiranja" },
+  { key: "infoHandover", href: "/tijek-preuzimanja" },
+  { key: "infoAppointment", href: "/termin-za-preuzimanje" },
+  { key: "infoComplaints", href: "/reklamacije" },
+  { key: "infoImpressum", href: "/impressum" },
 ] as const;
 
 /** Helper: enum->options for select inputs. */
@@ -98,7 +123,10 @@ export function toOptions<T extends string>(
   return (Object.keys(map) as T[]).map((value) => ({ value, label: map[value] }));
 }
 
-export function whatsappLink(text?: string): string {
-  const base = `https://wa.me/${DEALER.whatsapp}`;
+export function whatsappLink(
+  text?: string,
+  number: string = DEALER.whatsappDe,
+): string {
+  const base = `https://wa.me/${number}`;
   return text ? `${base}?text=${encodeURIComponent(text)}` : base;
 }

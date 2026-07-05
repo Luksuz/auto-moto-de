@@ -1,38 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  Calendar,
-  Gauge,
-  Fuel,
-  Cog,
-  Zap,
-  Phone,
-  Mail,
-  Clock,
-  MapPin,
-  ChevronRight,
-  User as UserIcon,
-  MessageCircle,
-} from "lucide-react";
+import { Check, Phone } from "lucide-react";
 import { getCarBySlug, getSimilarCars, primaryImage } from "@/lib/cars";
+import type { CarWithRelations } from "@/lib/cars";
 import { CarCard } from "@/components/car/car-card";
 import { CarGallery } from "@/components/car/car-gallery";
-import { CarSpecTabs } from "@/components/car/car-spec-tabs";
-import { LeadForm } from "@/components/site/lead-form";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { formatPrice, formatKm } from "@/lib/utils";
+import { formatPrice, formatKm, estimateMonthlyRate } from "@/lib/utils";
+import { DEALER, whatsappLink } from "@/lib/constants";
+import { getT } from "@/lib/i18n/server";
 import {
-  DEALER,
-  FINANCING,
-  PRICE_RATING_LABEL,
-  FUEL_TYPE_LABEL,
-  TRANSMISSION_LABEL,
-  BODY_TYPE_LABEL,
-  whatsappLink,
-} from "@/lib/constants";
+  FUEL_LABEL_I18N,
+  TRANSMISSION_LABEL_I18N,
+  BODY_TYPE_LABEL_I18N,
+  type Dict,
+} from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/config";
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
@@ -41,7 +25,7 @@ export async function generateMetadata(props: {
   const car = await getCarBySlug(slug);
 
   if (!car || !car.published) {
-    return { title: "Vozilo nije pronađeno — KupiAuto.de" };
+    return { title: "Vozilo nije pronađeno — AUTOCAR EU" };
   }
 
   const img = primaryImage(car);
@@ -52,7 +36,7 @@ export async function generateMetadata(props: {
       )}. Financiranje 100% online uz 0% učešća.`;
 
   return {
-    title: `${car.title} — ${formatPrice(car.priceEur)} | KupiAuto.de`,
+    title: `${car.title} — ${formatPrice(car.priceEur)} | AUTOCAR EU`,
     description,
     openGraph: {
       title: car.title,
@@ -62,16 +46,43 @@ export async function generateMetadata(props: {
   };
 }
 
-/** Standard annuity formula: monthly payment for a loan. */
-function monthlyEstimate(
-  principal: number,
-  annualRatePct: number,
-  months: number,
-): number {
-  const r = annualRatePct / 100 / 12;
-  if (r === 0) return principal / months;
-  return (principal * r) / (1 - Math.pow(1 + r, -months));
+type TechRow = { label: string; value: string };
+
+function buildTechRows(
+  car: CarWithRelations,
+  t: Dict,
+  locale: Locale,
+): TechRow[] {
+  const rows: TechRow[] = [];
+  const push = (label: string, value: string | number | null | undefined) => {
+    if (value === null || value === undefined || value === "") return;
+    rows.push({ label, value: String(value) });
+  };
+
+  push(t.firstReg, car.firstRegistration);
+  push(t.mileage, formatKm(car.mileageKm));
+  push(t.fuel, FUEL_LABEL_I18N[locale][car.fuelType]);
+  push(t.gearbox, TRANSMISSION_LABEL_I18N[locale][car.transmission]);
+  push(t.power, `${car.powerKw} kW (${car.powerKs} KS)`);
+  push(t.emission, car.emissionClass);
+  push(t.tBrand, car.brand);
+  push(t.tModel, car.model);
+  push(t.tBodyType, BODY_TYPE_LABEL_I18N[locale][car.bodyType]);
+  push(t.tEngine, car.engineCcm ? `${car.engineCcm} ccm` : null);
+  push(t.tDoors, car.doors);
+  push(t.tSeats, car.seats);
+  push(t.tAC, car.airConditioning);
+  push(t.tParking, car.parkingSensors);
+  push(t.tTuv, car.tuv);
+  push(t.tOrigin, car.origin);
+  push(t.tOwners, car.previousOwners);
+
+  return rows;
 }
+
+const PANEL_CLASS = "mt-[30px] border border-border p-[26px]";
+const PANEL_HEADING_CLASS =
+  "mb-[18px] font-display text-[17px] font-semibold uppercase tracking-[2px] text-primary";
 
 export default async function CarDetailPage(props: {
   params: Promise<{ slug: string }>;
@@ -81,259 +92,171 @@ export default async function CarDetailPage(props: {
 
   if (!car || !car.published) notFound();
 
+  const { t, locale } = await getT();
   const similar = await getSimilarCars(car, 4);
 
-  const monthly = Math.round(
-    monthlyEstimate(car.priceEur, FINANCING.exampleRate, FINANCING.exampleMonths),
-  );
+  const techRows = buildTechRows(car, t, locale);
+  const year = car.firstRegistration.split("/")[1];
+  const meta = [
+    year,
+    formatKm(car.mileageKm),
+    FUEL_LABEL_I18N[locale][car.fuelType],
+    TRANSMISSION_LABEL_I18N[locale][car.transmission],
+  ].join(" · ");
 
-  const agent = car.assignedAgent;
-  const agentName = agent?.name ?? DEALER.agent;
-  const agentPhone = agent?.phone ?? DEALER.phone;
-  const agentPhoneHref = (agent?.phone ?? DEALER.phone).replace(/[^\d+]/g, "");
-  const agentEmail = agent?.email ?? DEALER.email;
+  const inquiry =
+    locale === "de"
+      ? `Hallo, ich interessiere mich für: ${car.title} (${formatPrice(car.priceEur)})`
+      : `Pozdrav, zanima me vozilo: ${car.title} (${formatPrice(car.priceEur)})`;
 
-  const waText = `Pozdrav, zanima me vozilo ${car.title} (${formatPrice(
-    car.priceEur,
-  )}).`;
-
-  const chips = [
-    { icon: Calendar, value: car.firstRegistration },
-    { icon: Gauge, value: formatKm(car.mileageKm) },
-    { icon: Fuel, value: FUEL_TYPE_LABEL[car.fuelType] },
-    { icon: Cog, value: TRANSMISSION_LABEL[car.transmission] },
-    { icon: Zap, value: `${car.powerKw} kW (${car.powerKs} KS)` },
-  ];
+  const hasOrigin = Boolean(car.origin?.trim() || car.originDetails?.trim());
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
-      {/* Breadcrumb */}
-      <nav className="mb-5 flex items-center gap-1.5 text-sm text-muted">
-        <Link href="/" className="hover:text-foreground">
-          Naslovnica
-        </Link>
-        <ChevronRight className="size-3.5" />
-        <Link href="/vozila" className="hover:text-foreground">
-          Vozila
-        </Link>
-        <ChevronRight className="size-3.5" />
-        <span className="truncate text-foreground">{car.title}</span>
-      </nav>
+    <div className="px-5 py-11 sm:px-10 lg:px-14">
+      <Link
+        href="/vozila"
+        className="mb-6 inline-block text-[14px] font-semibold uppercase tracking-[1.5px] text-muted-2 hover:text-primary"
+      >
+        ← {t.backToCars}
+      </Link>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.6fr_1fr]">
-        {/* Left column */}
-        <div className="space-y-8">
-          <CarGallery images={car.images} title={car.title} />
+      <div className="grid grid-cols-1 items-start gap-[34px] lg:grid-cols-[1.25fr_.75fr]">
+        {/* Left: gallery + stacked panels */}
+        <div>
+          <CarGallery
+            images={car.images}
+            title={car.title}
+            emptyLabel={t.noPhotos}
+          />
 
-          {/* Title block (mobile shows here under gallery) */}
-          <div className="lg:hidden">
-            <TitleBlock
-              car={car}
-              chips={chips}
-              monthly={monthly}
-            />
-          </div>
+          {techRows.length > 0 && (
+            <section className={PANEL_CLASS}>
+              <h2 className={PANEL_HEADING_CLASS}>{t.techDetails}</h2>
+              <div className="grid gap-x-[22px] gap-y-4 text-[14.5px] [grid-template-columns:repeat(auto-fit,minmax(140px,1fr))]">
+                {techRows.map((row) => (
+                  <div key={row.label}>
+                    <div className="text-[12px] uppercase tracking-[1.5px] text-muted-2">
+                      {row.label}
+                    </div>
+                    <div className="mt-[3px] font-semibold">{row.value}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
-          {car.description && (
-            <section className="rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6">
-              <h2 className="mb-3 text-lg font-bold text-foreground">Opis</h2>
-              <div className="whitespace-pre-line text-sm leading-relaxed text-foreground/90">
+          {car.description?.trim() && (
+            <section className={PANEL_CLASS}>
+              <h2 className={PANEL_HEADING_CLASS}>{t.descTitle}</h2>
+              <div className="whitespace-pre-line text-[14.5px] leading-relaxed text-muted">
                 {car.description}
               </div>
             </section>
           )}
 
-          <CarSpecTabs car={car} />
+          {car.equipment.length > 0 && (
+            <section className={PANEL_CLASS}>
+              <h2 className={PANEL_HEADING_CLASS}>{t.equipTitle}</h2>
+              <ul className="grid grid-cols-1 gap-x-[22px] gap-y-2.5 text-[14.5px] sm:grid-cols-2 lg:grid-cols-3">
+                {car.equipment.map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {car.warranty?.trim() && (
+            <section className={PANEL_CLASS}>
+              <h2 className={PANEL_HEADING_CLASS}>{t.warrantyTitle}</h2>
+              <div className="whitespace-pre-line text-[14.5px] leading-relaxed text-muted">
+                {car.warranty}
+              </div>
+            </section>
+          )}
+
+          {hasOrigin && (
+            <section className={PANEL_CLASS}>
+              <h2 className={PANEL_HEADING_CLASS}>{t.originTitle}</h2>
+              <div className="space-y-3 text-[14.5px] leading-relaxed">
+                {car.origin?.trim() && (
+                  <p className="font-semibold">{car.origin}</p>
+                )}
+                {car.originDetails?.trim() && (
+                  <div className="whitespace-pre-line text-muted">
+                    {car.originDetails}
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
         </div>
 
-        {/* Right column (sticky) */}
-        <div className="space-y-6">
-          <div className="hidden lg:block">
-            <TitleBlock car={car} chips={chips} monthly={monthly} />
+        {/* Right: sticky buy card */}
+        <div className="border border-border bg-surface p-7 lg:sticky lg:top-24">
+          <h1 className="mb-2 font-display text-[27px] font-semibold uppercase">
+            {car.title}
+          </h1>
+          <div className="mb-5 text-[14px] text-muted-2">{meta}</div>
+          <div className="mb-1 font-display text-[38px] text-primary">
+            {formatPrice(car.priceEur)}
+          </div>
+          <div className="mb-6 text-[15px] font-semibold text-success">
+            {t.finRate} {formatPrice(estimateMonthlyRate(car.priceEur))}/{t.month}
           </div>
 
-          {/* CTA card */}
-          <Card>
-            <CardContent className="space-y-2.5">
-              <LeadForm
-                carId={car.id}
-                type="FINANCING"
-                triggerLabel="Zatraži financiranje"
-                triggerVariant="accent"
-                triggerSize="lg"
-                triggerClassName="w-full"
-              />
-              <LeadForm
-                carId={car.id}
-                type="VIEWING"
-                triggerLabel="Zakaži razgledavanje"
-                triggerVariant="navy"
-                triggerSize="lg"
-                triggerClassName="w-full"
-              />
-              <div className="grid grid-cols-2 gap-2.5 pt-1">
-                <Button asChild variant="whatsapp" size="lg">
-                  <a
-                    href={whatsappLink(waText)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageCircle className="size-4" />
-                    WhatsApp
-                  </a>
-                </Button>
-                <Button asChild variant="outline" size="lg">
-                  <a href={`tel:${agentPhoneHref}`}>
-                    <Phone className="size-4" />
-                    Nazovi
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col gap-2.5">
+            <Button asChild variant="whatsapp" size="lg" className="w-full font-bold text-[15.5px]">
+              <a
+                href={whatsappLink(inquiry, DEALER.whatsappDe)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Phone className="size-4" />
+                WhatsApp DE {DEALER.whatsappDePretty}
+              </a>
+            </Button>
+            <Button asChild variant="whatsappDark" size="lg" className="w-full font-bold text-[15.5px]">
+              <a
+                href={whatsappLink(inquiry, DEALER.whatsappHr)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Phone className="size-4" />
+                WhatsApp HR {DEALER.whatsappHrPretty}
+              </a>
+            </Button>
+            <Button asChild variant="goldOutline" size="lg" className="w-full text-[14px]">
+              <Link href={`/financiranje?car=${car.slug}`}>{t.reqFinancing}</Link>
+            </Button>
+          </div>
 
-          {/* Agent card */}
-          <Card>
-            <CardContent>
-              <div className="flex items-center gap-3">
-                <div className="grid size-12 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-                  <UserIcon className="size-6" />
-                </div>
-                <div>
-                  <p className="text-[11px] uppercase tracking-wide text-muted">
-                    Vaš prodajni savjetnik
-                  </p>
-                  <p className="text-base font-bold text-foreground">
-                    {agentName}
-                  </p>
-                  <p className="text-sm text-muted">{DEALER.legalName}</p>
-                </div>
-              </div>
-
-              <ul className="mt-4 space-y-2.5 border-t border-border pt-4 text-sm">
-                <li className="flex items-center gap-2.5">
-                  <Phone className="size-4 shrink-0 text-primary" />
-                  <a
-                    href={`tel:${agentPhoneHref}`}
-                    className="font-medium text-foreground hover:text-primary"
-                  >
-                    {agentPhone}
-                  </a>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Mail className="size-4 shrink-0 text-primary" />
-                  <a
-                    href={`mailto:${agentEmail}`}
-                    className="font-medium text-foreground hover:text-primary"
-                  >
-                    {agentEmail}
-                  </a>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-                  <span className="text-foreground/90">
-                    {DEALER.street}, {DEALER.city}
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <Clock className="mt-0.5 size-4 shrink-0 text-primary" />
-                  <span className="text-foreground/90">
-                    Pon–Pet: {DEALER.hoursWeek}
-                    <br />
-                    Sub: {DEALER.hoursSat}
-                  </span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+          <div className="mt-4 text-center text-[13px] text-muted-2">
+            {t.warrantyNote}
+          </div>
         </div>
       </div>
 
       {/* Similar cars */}
       {similar.length > 0 && (
         <section className="mt-14">
-          <div className="mb-5 flex items-center justify-between">
-            <h2 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
-              Slična vozila
-            </h2>
-            <Link
-              href="/vozila"
-              className="text-sm font-semibold text-primary hover:underline"
-            >
-              Sva vozila
-            </Link>
-          </div>
+          <h2 className="mb-6 font-display text-[24px] font-semibold uppercase tracking-[1px]">
+            {t.similarCars}
+          </h2>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {similar.map((c) => (
-              <CarCard key={c.id} car={c} />
+              <CarCard
+                key={c.id}
+                car={c}
+                locale={locale}
+                detailsLabel={t.details}
+              />
             ))}
           </div>
         </section>
       )}
     </div>
   );
-}
-
-function TitleBlock({
-  car,
-  chips,
-  monthly,
-}: {
-  car: Awaited<ReturnType<typeof getCarBySlug>> & object;
-  chips: { icon: React.ElementType; value: string }[];
-  monthly: number;
-}) {
-  if (!car) return null;
-  return (
-    <div>
-      <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">
-        {BODY_TYPE_LABEL[car.bodyType]}
-      </span>
-      <h1 className="mt-1 text-2xl font-extrabold leading-tight tracking-tight text-foreground sm:text-3xl">
-        {car.title}
-      </h1>
-
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <span className="text-3xl font-extrabold text-navy">
-          {formatPrice(car.priceEur)}
-        </span>
-        {car.priceRating && (
-          <Badge variant="rating" className="bg-rating text-white">
-            {PRICE_RATING_LABEL[car.priceRating]}
-          </Badge>
-        )}
-      </div>
-
-      {/* Financing line */}
-      <p className="mt-2 text-sm text-muted">
-        Već od{" "}
-        <span className="font-bold text-foreground">
-          {formatPrice(monthly)}/mj
-        </span>{" "}
-        uz rok od {FINANCING.exampleMonths} mjeseci, kamata{" "}
-        {formatRateInline(FINANCING.exampleRate)}%, učešće{" "}
-        {formatPrice(FINANCING.downPayment)}.
-      </p>
-
-      {/* Key spec chips */}
-      <div className="mt-5 flex flex-wrap gap-2">
-        {chips.map((chip, i) => {
-          const Icon = chip.icon;
-          return (
-            <span
-              key={i}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium text-foreground"
-            >
-              <Icon className="size-3.5 text-primary" />
-              {chip.value}
-            </span>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function formatRateInline(value: number): string {
-  return value.toFixed(2).replace(".", ",");
 }

@@ -36,7 +36,7 @@ export default async function FeedbackPage() {
         <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent-600">
           Privremeno • interno
         </span>
-        <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-navy">
+        <h1 className="mt-3 font-display text-3xl font-semibold uppercase text-foreground">
           Feedback ploča
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { DEALER } from "@/lib/constants";
+import { DEALER, SITE_URL } from "@/lib/constants";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,27 +14,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://kupiauto.de"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "KupiAuto.de — Rabljena vozila iz Njemačke uz financiranje",
-    template: "%s | KupiAuto.de",
+    default: "AUTOCAR EU — Vozila iz Njemačke i Austrije",
+    template: "%s | AUTOCAR EU",
   },
   description:
-    "Provjerena rabljena vozila iz Njemačke. Financiranje 100% online, 0% učešća, odobrenje unutar 24h za sve zaposlene u Njemačkoj.",
+    "Provjerena vozila iz Njemačke i Austrije. Osam godina povjerenja, preko 350 vozila na stanju, garancija do 3 godine i financiranje za sve zaposlene u Njemačkoj i Austriji.",
   keywords: [
     "rabljeni auti",
     "auti iz Njemačke",
+    "auti iz Austrije",
     "autokredit",
     "financiranje vozila",
-    "KupiAuto",
+    "AUTOCAR EU",
   ],
   openGraph: {
     type: "website",
     locale: "hr_HR",
     siteName: DEALER.name,
-    title: "KupiAuto.de — Rabljena vozila iz Njemačke",
+    title: "AUTOCAR EU — Vozila iz Njemačke i Austrije",
     description:
-      "Financiranje 100% online, 0% učešća, odobrenje unutar 24h.",
+      "Preko 350 provjerenih vozila na stanju, garancija do 3 godine i financiranje za zaposlene u Njemačkoj i Austriji.",
   },
 };
 

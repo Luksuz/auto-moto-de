@@ -84,8 +84,8 @@ export function AiDescription({
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-border bg-surface-2/40 p-4">
-      <div className="flex items-center gap-2 text-sm font-semibold">
+    <div className="space-y-3 rounded-lg border border-border bg-surface-2/40 p-4">
+      <div className="flex items-center gap-2 font-display text-sm font-semibold uppercase tracking-[2px]">
         <Sparkles className="size-4 text-primary" />
         AI generiranje opisa
       </div>
@@ -104,7 +104,7 @@ export function AiDescription({
                 type="button"
                 onClick={() => toggle(img.url)}
                 className={cn(
-                  "relative aspect-[4/3] overflow-hidden rounded-md border-2",
+                  "relative aspect-[4/3] overflow-hidden border-2",
                   isSel ? "border-primary" : "border-transparent opacity-70",
                 )}
               >
@@ -125,14 +125,14 @@ export function AiDescription({
       )}
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="border border-error/40 bg-surface-2 px-3 py-2 text-sm text-error">
           {error}
         </p>
       )}
 
       <Button
         type="button"
-        variant="navy"
+        variant="outline"
         size="sm"
         onClick={generate}
         disabled={loading}

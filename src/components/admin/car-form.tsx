@@ -102,12 +102,15 @@ function Field({
 }) {
   return (
     <div>
-      <Label htmlFor={htmlFor}>
+      <Label
+        htmlFor={htmlFor}
+        className="text-[12px] font-bold uppercase tracking-[1.5px] text-muted mb-2"
+      >
         {label}
-        {required && <span className="text-red-600"> *</span>}
+        {required && <span className="text-error"> *</span>}
       </Label>
       {children}
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-xs text-error">{error}</p>}
     </div>
   );
 }
@@ -214,7 +217,7 @@ export function CarForm({
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       {formError && (
-        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="border border-error/40 bg-surface-2 px-4 py-3 text-sm text-error">
           {formError}
         </div>
       )}
@@ -222,12 +225,12 @@ export function CarForm({
       {/* Osnovno */}
       <Card>
         <CardHeader>
-          <CardTitle>Osnovno</CardTitle>
+          <CardTitle className="font-display uppercase tracking-[2px]">Osnovno</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <Field label="Naslov" htmlFor="title" required error={errors.title}>
-              <Input
+              <Input className="bg-background border-border-strong"
                 id="title"
                 value={values.title}
                 onChange={(e) => onTitleChange(e.target.value)}
@@ -236,7 +239,7 @@ export function CarForm({
             </Field>
           </div>
           <Field label="Marka" htmlFor="brand" required error={errors.brand}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="brand"
               value={values.brand}
               onChange={(e) => set("brand", e.target.value)}
@@ -244,7 +247,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Model" htmlFor="model" required error={errors.model}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="model"
               value={values.model}
               onChange={(e) => set("model", e.target.value)}
@@ -253,7 +256,7 @@ export function CarForm({
           </Field>
           <div className="sm:col-span-2">
             <Field label="Slug (URL)" htmlFor="slug" error={errors.slug}>
-              <Input
+              <Input className="bg-background border-border-strong"
                 id="slug"
                 value={values.slug}
                 onChange={(e) => {
@@ -270,7 +273,7 @@ export function CarForm({
             required
             error={errors.priceEur}
           >
-            <Input
+            <Input className="bg-background border-border-strong"
               id="priceEur"
               type="number"
               min={0}
@@ -280,7 +283,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Ocjena cijene" htmlFor="priceRating" error={errors.priceRating}>
-            <Select
+            <Select className="bg-background border-border-strong"
               id="priceRating"
               value={values.priceRating}
               onChange={(e) => set("priceRating", e.target.value)}
@@ -294,7 +297,7 @@ export function CarForm({
             </Select>
           </Field>
           <Field label="Dodijeljeni agent" htmlFor="agent" error={errors.assignedAgentId}>
-            <Select
+            <Select className="bg-background border-border-strong"
               id="agent"
               value={values.assignedAgentId}
               onChange={(e) => set("assignedAgentId", e.target.value)}
@@ -311,7 +314,7 @@ export function CarForm({
             <label className="flex items-center gap-2 text-sm font-medium">
               <input
                 type="checkbox"
-                className="size-4 rounded border-border"
+                className="size-4 accent-primary"
                 checked={values.published}
                 onChange={(e) => set("published", e.target.checked)}
               />
@@ -320,7 +323,7 @@ export function CarForm({
             <label className="flex items-center gap-2 text-sm font-medium">
               <input
                 type="checkbox"
-                className="size-4 rounded border-border"
+                className="size-4 accent-primary"
                 checked={values.featured}
                 onChange={(e) => set("featured", e.target.checked)}
               />
@@ -333,11 +336,11 @@ export function CarForm({
       {/* Tehnički detalji */}
       <Card>
         <CardHeader>
-          <CardTitle>Tehnički detalji</CardTitle>
+          <CardTitle className="font-display uppercase tracking-[2px]">Tehnički detalji</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="Karoserija" htmlFor="bodyType" required error={errors.bodyType}>
-            <Select
+            <Select className="bg-background border-border-strong"
               id="bodyType"
               value={values.bodyType}
               onChange={(e) => set("bodyType", e.target.value)}
@@ -355,7 +358,7 @@ export function CarForm({
             required
             error={errors.firstRegistration}
           >
-            <Input
+            <Input className="bg-background border-border-strong"
               id="firstRegistration"
               value={values.firstRegistration}
               onChange={(e) => set("firstRegistration", e.target.value)}
@@ -363,7 +366,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Kilometraža (km)" htmlFor="mileageKm" required error={errors.mileageKm}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="mileageKm"
               type="number"
               min={0}
@@ -373,7 +376,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Gorivo" htmlFor="fuelType" required error={errors.fuelType}>
-            <Select
+            <Select className="bg-background border-border-strong"
               id="fuelType"
               value={values.fuelType}
               onChange={(e) => set("fuelType", e.target.value)}
@@ -386,7 +389,7 @@ export function CarForm({
             </Select>
           </Field>
           <Field label="Mjenjač" htmlFor="transmission" required error={errors.transmission}>
-            <Select
+            <Select className="bg-background border-border-strong"
               id="transmission"
               value={values.transmission}
               onChange={(e) => set("transmission", e.target.value)}
@@ -399,7 +402,7 @@ export function CarForm({
             </Select>
           </Field>
           <Field label="Snaga (kW)" htmlFor="powerKw" required error={errors.powerKw}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="powerKw"
               type="number"
               min={0}
@@ -409,7 +412,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Snaga (KS)" htmlFor="powerKs" required error={errors.powerKs}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="powerKs"
               type="number"
               min={0}
@@ -419,7 +422,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Zapremnina (ccm)" htmlFor="engineCcm" error={errors.engineCcm}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="engineCcm"
               type="number"
               min={0}
@@ -429,7 +432,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Broj vrata" htmlFor="doors" error={errors.doors}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="doors"
               value={values.doors}
               onChange={(e) => set("doors", e.target.value)}
@@ -437,7 +440,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Broj sjedala" htmlFor="seats" error={errors.seats}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="seats"
               type="number"
               min={0}
@@ -447,7 +450,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Klima" htmlFor="airConditioning" error={errors.airConditioning}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="airConditioning"
               value={values.airConditioning}
               onChange={(e) => set("airConditioning", e.target.value)}
@@ -455,7 +458,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Parkirni senzori" htmlFor="parkingSensors" error={errors.parkingSensors}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="parkingSensors"
               value={values.parkingSensors}
               onChange={(e) => set("parkingSensors", e.target.value)}
@@ -463,7 +466,7 @@ export function CarForm({
             />
           </Field>
           <Field label="TÜV do" htmlFor="tuv" error={errors.tuv}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="tuv"
               value={values.tuv}
               onChange={(e) => set("tuv", e.target.value)}
@@ -471,7 +474,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Emisijska klasa" htmlFor="emissionClass" error={errors.emissionClass}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="emissionClass"
               value={values.emissionClass}
               onChange={(e) => set("emissionClass", e.target.value)}
@@ -479,7 +482,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Porijeklo" htmlFor="origin" error={errors.origin}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="origin"
               value={values.origin}
               onChange={(e) => set("origin", e.target.value)}
@@ -487,7 +490,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Broj vlasnika" htmlFor="previousOwners" error={errors.previousOwners}>
-            <Input
+            <Input className="bg-background border-border-strong"
               id="previousOwners"
               type="number"
               min={0}
@@ -502,10 +505,10 @@ export function CarForm({
       {/* Oprema */}
       <Card>
         <CardHeader>
-          <CardTitle>Oprema</CardTitle>
+          <CardTitle className="font-display uppercase tracking-[2px]">Oprema</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <Input
+          <Input className="bg-background border-border-strong"
             value={equipInput}
             onChange={(e) => setEquipInput(e.target.value)}
             onKeyDown={(e) => {
@@ -527,7 +530,7 @@ export function CarForm({
                   <button
                     type="button"
                     onClick={() => removeEquip(item)}
-                    className="text-muted hover:text-red-600"
+                    className="text-muted hover:text-error"
                     aria-label={`Ukloni ${item}`}
                   >
                     <X className="size-3.5" />
@@ -542,7 +545,7 @@ export function CarForm({
       {/* Slike */}
       <Card>
         <CardHeader>
-          <CardTitle>Slike</CardTitle>
+          <CardTitle className="font-display uppercase tracking-[2px]">Slike</CardTitle>
         </CardHeader>
         <CardContent>
           <ImageManager images={images} onChange={setImages} />
@@ -552,7 +555,7 @@ export function CarForm({
       {/* Opisi */}
       <Card>
         <CardHeader>
-          <CardTitle>Opisi</CardTitle>
+          <CardTitle className="font-display uppercase tracking-[2px]">Opisi</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <AiDescription
@@ -561,7 +564,7 @@ export function CarForm({
             onResult={(text) => set("description", text)}
           />
           <Field label="Opis" htmlFor="description" error={errors.description}>
-            <Textarea
+            <Textarea className="bg-background border-border-strong"
               id="description"
               rows={8}
               value={values.description}
@@ -570,7 +573,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Garancija" htmlFor="warranty" error={errors.warranty}>
-            <Textarea
+            <Textarea className="bg-background border-border-strong"
               id="warranty"
               rows={4}
               value={values.warranty}
@@ -578,7 +581,7 @@ export function CarForm({
             />
           </Field>
           <Field label="Porijeklo vozila" htmlFor="originDetails" error={errors.originDetails}>
-            <Textarea
+            <Textarea className="bg-background border-border-strong"
               id="originDetails"
               rows={4}
               value={values.originDetails}
@@ -596,7 +599,12 @@ export function CarForm({
         >
           Odustani
         </Button>
-        <Button type="submit" disabled={pending}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={pending}
+          className="font-display uppercase tracking-[2px]"
+        >
           <Save className="size-4" />
           {pending ? "Spremanje..." : carId ? "Spremi promjene" : "Spremi vozilo"}
         </Button>

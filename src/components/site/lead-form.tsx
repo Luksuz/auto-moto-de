@@ -9,19 +9,28 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createLead } from "@/lib/actions/leads";
+import { oswald, hanken } from "@/lib/fonts";
 
 const TITLES: Record<LeadType, string> = {
   CONTACT: "Pošaljite upit",
   FINANCING: "Zatraži financiranje",
   VIEWING: "Zakaži razgledavanje",
+  PROBLEM: "Prijavite problem",
+  INSURANCE: "Upit za osiguranje",
 };
 
 const SUBTITLES: Record<LeadType, string> = {
   CONTACT: "Ostavite svoje podatke i javit ćemo vam se u najkraćem roku.",
   FINANCING:
     "Pošaljite zahtjev za financiranjem — odgovaramo unutar jednog radnog dana.",
-  VIEWING: "Dogovorite termin za razgledavanje vozila u našem salonu.",
+  VIEWING: "Dogovorite termin za preuzimanje ili razgledavanje vozila.",
+  PROBLEM: "Opišite problem s vozilom i javit ćemo vam se s rješenjem.",
+  INSURANCE: "Pošaljite upit za osiguranje vozila.",
 };
+
+const LABEL_CLASS =
+  "text-[12px] font-bold uppercase tracking-[1.5px] text-muted mb-2";
+const FIELD_CLASS = "bg-background border-border-strong";
 
 interface LeadFormProps {
   carId?: string;
@@ -115,22 +124,24 @@ export function LeadForm({
       {mounted && open
         ? createPortal(
             <div
-              className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center"
+              // Portals to document.body, outside the .theme-autocar wrapper —
+              // re-apply the theme scope + font vars or the modal renders light.
+              className={`${oswald.variable} ${hanken.variable} theme-autocar font-body fixed inset-0 z-[100] flex items-end justify-center sm:items-center`}
               role="dialog"
               aria-modal="true"
               aria-label={TITLES[type]}
             >
               <div
-                className="absolute inset-0 bg-navy/60 backdrop-blur-sm"
+                className="absolute inset-0 bg-background/80 backdrop-blur-sm"
                 onClick={close}
               />
 
-              <div className="relative z-10 max-h-[92vh] w-full overflow-y-auto rounded-t-2xl border border-border bg-surface shadow-xl animate-fade-in-up sm:max-w-md sm:rounded-2xl">
+              <div className="relative z-10 max-h-[92vh] w-full overflow-y-auto border border-border bg-surface animate-fade-in-up sm:max-w-md">
                 <button
                   type="button"
                   onClick={close}
                   aria-label="Zatvori"
-                  className="absolute right-3 top-3 grid size-9 place-items-center rounded-lg text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
+                  className="absolute right-3 top-3 grid size-9 place-items-center text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
                 >
                   <X className="size-5" />
                 </button>
@@ -139,7 +150,7 @@ export function LeadForm({
                   {done ? (
                     <div className="flex flex-col items-center py-6 text-center">
                       <CheckCircle2 className="size-14 text-success" />
-                      <h2 className="mt-4 text-xl font-bold text-foreground">
+                      <h2 className="mt-4 font-display text-xl font-semibold uppercase tracking-[1px] text-foreground">
                         Hvala na upitu!
                       </h2>
                       <p className="mt-2 text-sm text-muted">
@@ -157,7 +168,7 @@ export function LeadForm({
                     </div>
                   ) : (
                     <>
-                      <h2 className="pr-8 text-xl font-bold text-foreground">
+                      <h2 className="pr-8 font-display text-xl font-semibold uppercase tracking-[1px] text-foreground">
                         {TITLES[type]}
                       </h2>
                       <p className="mt-1.5 text-sm text-muted">
@@ -166,18 +177,23 @@ export function LeadForm({
 
                       <form onSubmit={onSubmit} className="mt-5 space-y-4">
                         <div>
-                          <Label htmlFor="lead-name">Ime i prezime *</Label>
+                          <Label htmlFor="lead-name" className={LABEL_CLASS}>
+                            Ime i prezime *
+                          </Label>
                           <Input
                             id="lead-name"
                             name="name"
                             required
                             autoComplete="name"
                             placeholder="Vaše ime i prezime"
+                            className={FIELD_CLASS}
                           />
                         </div>
 
                         <div>
-                          <Label htmlFor="lead-phone">Telefon *</Label>
+                          <Label htmlFor="lead-phone" className={LABEL_CLASS}>
+                            Telefon *
+                          </Label>
                           <Input
                             id="lead-phone"
                             name="phone"
@@ -185,38 +201,45 @@ export function LeadForm({
                             required
                             autoComplete="tel"
                             placeholder="+49 ..."
+                            className={FIELD_CLASS}
                           />
                         </div>
 
                         <div>
-                          <Label htmlFor="lead-email">E-mail</Label>
+                          <Label htmlFor="lead-email" className={LABEL_CLASS}>
+                            E-mail
+                          </Label>
                           <Input
                             id="lead-email"
                             name="email"
                             type="email"
                             autoComplete="email"
                             placeholder="vasa@adresa.com"
+                            className={FIELD_CLASS}
                           />
                         </div>
 
                         <div>
-                          <Label htmlFor="lead-message">Poruka</Label>
+                          <Label htmlFor="lead-message" className={LABEL_CLASS}>
+                            Poruka
+                          </Label>
                           <Textarea
                             id="lead-message"
                             name="message"
                             placeholder="Vaša poruka ili pitanje..."
+                            className={FIELD_CLASS}
                           />
                         </div>
 
                         {error && (
-                          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                          <p className="border border-error/40 bg-surface-2 px-3 py-2 text-sm text-error">
                             {error}
                           </p>
                         )}
 
                         <Button
                           type="submit"
-                          variant="accent"
+                          variant="primary"
                           size="lg"
                           className="w-full"
                           disabled={pending}

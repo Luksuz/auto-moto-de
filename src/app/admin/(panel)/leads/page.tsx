@@ -11,6 +11,8 @@ const TYPE_VARIANT: Record<LeadType, "primary" | "accent" | "navy"> = {
   CONTACT: "primary",
   FINANCING: "accent",
   VIEWING: "navy",
+  PROBLEM: "accent",
+  INSURANCE: "primary",
 };
 
 function fmtDate(d: Date) {
@@ -33,7 +35,10 @@ export default async function LeadsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Upiti</h1>
+        <div className="mb-2 font-display text-[12px] uppercase tracking-[4px] text-primary">
+          Administracija
+        </div>
+        <h1 className="font-display text-2xl font-semibold uppercase">Upiti</h1>
         <p className="text-sm text-muted">{leads.length} upita</p>
       </div>
 
@@ -44,7 +49,7 @@ export default async function LeadsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-surface-2 text-left text-xs uppercase tracking-wide text-muted">
+                <tr className="border-b border-border bg-surface-2 text-left text-[11px] uppercase tracking-[1.5px] text-muted-2">
                   <th className="px-4 py-3 font-semibold">Kontakt</th>
                   <th className="px-4 py-3 font-semibold">Tip</th>
                   <th className="px-4 py-3 font-semibold">Vozilo</th>

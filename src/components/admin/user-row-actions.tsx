@@ -27,7 +27,7 @@ export function UserRowActions({
       <Select
         value={role}
         disabled={pending || isSelf}
-        className="h-9 w-36"
+        className="h-9 w-36 bg-background border-border-strong"
         onChange={(e) => {
           const next = e.target.value as Role;
           startTransition(async () => {

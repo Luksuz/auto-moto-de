@@ -17,12 +17,19 @@ export default async function NovoVoziloPage() {
       <div className="flex items-center gap-3">
         <Link
           href="/admin/vozila"
-          className="text-muted hover:text-foreground"
+          className="text-muted hover:text-primary"
           aria-label="Natrag"
         >
           <ArrowLeft className="size-5" />
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight">Novo vozilo</h1>
+        <div>
+          <div className="mb-2 font-display text-[12px] uppercase tracking-[4px] text-primary">
+            Administracija
+          </div>
+          <h1 className="font-display text-2xl font-semibold uppercase">
+            Novo vozilo
+          </h1>
+        </div>
       </div>
       <CarForm agents={agents} />
     </div>

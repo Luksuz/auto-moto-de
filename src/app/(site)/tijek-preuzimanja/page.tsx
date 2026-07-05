@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { Check, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DEALER } from "@/lib/constants";
+import { DEALER, whatsappLink } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Tijek preuzimanja — KupiAuto.de",
+  title: "Tijek preuzimanja — AUTOCAR EU",
   description:
     "Kako izgleda preuzimanje vozila — od dogovorenog termina do predaje ključeva.",
 };
 
 const STEPS = [
   {
-    title: "Dolazak u salon",
-    text: "Dolazite u dogovoreno vrijeme na adresu našeg salona. Ponesite osobni dokument i dokumentaciju vezanu uz financiranje.",
+    title: "Dolazak na preuzimanje",
+    text: "Dolazite u dogovoreno vrijeme na dogovorenu lokaciju. Ponesite osobni dokument i dokumentaciju vezanu uz financiranje.",
   },
   {
     title: "Pregled vozila",
@@ -31,8 +31,8 @@ const STEPS = [
 
 export default function TijekPreuzimanjaPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-      <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+    <div className="mx-auto max-w-3xl px-5 py-12 sm:px-10 lg:px-14 lg:py-16">
+      <h1 className="font-display text-[clamp(28px,6vw,40px)] font-semibold uppercase text-foreground">
         Tijek preuzimanja
       </h1>
       <p className="mt-4 text-lg leading-relaxed text-muted">
@@ -44,15 +44,15 @@ export default function TijekPreuzimanjaPage() {
         {STEPS.map((step, i) => (
           <li
             key={step.title}
-            className="flex gap-4 rounded-2xl border border-border bg-surface p-6 shadow-sm"
+            className="flex gap-4 border border-border bg-surface p-6"
           >
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-base font-extrabold text-primary-foreground">
+            <span className="grid size-10 shrink-0 place-items-center bg-primary font-display text-base font-semibold text-primary-foreground">
               {i + 1}
             </span>
             <div>
-              <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
+              <h2 className="flex items-center gap-2 font-display text-lg font-semibold uppercase tracking-[1px] text-foreground">
                 {step.title}
-                <Check className="size-4 text-success" />
+                <Check className="size-4 text-primary" />
               </h2>
               <p className="mt-1.5 text-sm leading-relaxed text-muted">
                 {step.text}
@@ -63,11 +63,18 @@ export default function TijekPreuzimanjaPage() {
       </ol>
 
       <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-        <Button asChild variant="accent" size="lg">
+        <Button asChild variant="primary" size="lg">
           <Link href="/termin-za-preuzimanje">Dogovori termin</Link>
         </Button>
-        <Button asChild variant="outline" size="lg">
-          <a href={`tel:${DEALER.phoneHref}`}>Nazovi: {DEALER.phone}</a>
+        <Button asChild variant="whatsapp" size="lg">
+          <a
+            href={whatsappLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Phone className="size-4" />
+            WhatsApp {DEALER.whatsappDePretty}
+          </a>
         </Button>
       </div>
     </div>

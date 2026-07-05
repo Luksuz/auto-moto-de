@@ -58,6 +58,7 @@ export function CarRowActions({
       <Button
         variant={confirming ? "danger" : "ghost"}
         size="sm"
+        className={confirming ? undefined : "text-error hover:bg-error/10"}
         onClick={onDelete}
         disabled={pending}
       >

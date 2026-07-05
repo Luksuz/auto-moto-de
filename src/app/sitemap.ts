@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { SITE_URL } from "@/lib/constants";
 
-const BASE = "https://kupiauto.de";
+const BASE = SITE_URL;
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPaths = [
     "",
     "/vozila",
+    "/financiranje",
+    "/prijavi-problem",
+    "/osiguranje",
     "/o-nama",
     "/postupak-kupnje",
     "/uvjeti-financiranja",

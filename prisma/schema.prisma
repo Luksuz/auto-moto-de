@@ -49,6 +49,8 @@ enum LeadType {
   CONTACT
   FINANCING
   VIEWING
+  PROBLEM
+  INSURANCE
 }
 
 enum LeadStatus {

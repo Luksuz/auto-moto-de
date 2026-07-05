@@ -15,6 +15,11 @@ export function formatKm(value: number): string {
   return new Intl.NumberFormat("de-DE").format(value) + " km";
 }
 
+/** Estimated monthly financing rate shown on cards/detail (prototype heuristic). */
+export function estimateMonthlyRate(priceEur: number): number {
+  return Math.round(priceEur / 86);
+}
+
 /** Build a URL-safe slug from a car title. */
 export function slugify(input: string): string {
   return input

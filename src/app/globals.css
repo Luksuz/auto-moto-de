@@ -28,6 +28,52 @@
   --rating: #1f9d55;
 
   --radius: 0.75rem;
+
+  /* Tokens shared by both themes (AUTOCAR EU palette additions) */
+  --muted-2: #8f8a7d;
+  --border-strong: #2e2e33;
+  --border-soft: #1e1e22;
+  --whatsapp: #1faf38;
+  --whatsapp-600: #189a2f;
+  --whatsapp-dark: #146c27;
+  --whatsapp-dark-600: #0f5a1f;
+  --error: #e8434a;
+}
+
+/* ----------------------------------------------------------------------------
+   AUTOCAR EU dark theme — public site only (admin keeps the :root palette).
+   Tailwind v4 token utilities emit var(--x) resolved at use-site, so scoping
+   the custom-property overrides to this class restyles the whole subtree.
+---------------------------------------------------------------------------- */
+.theme-autocar {
+  --background: #0c0c0e;
+  --surface: #121215;
+  --surface-2: #1b1912;
+  --foreground: #ece7dc;
+  --muted: #b8b2a4;
+  --border: #232326;
+
+  --navy: #ece7dc;
+  --navy-700: #ece7dc;
+  --navy-600: #ece7dc;
+
+  --primary: #d8a94a;
+  --primary-600: #c69a3e;
+  --primary-foreground: #141414;
+
+  --accent: #d8a94a;
+  --accent-600: #c69a3e;
+  --accent-foreground: #141414;
+
+  --success: #1faf38;
+  --rating: #1faf38;
+
+  --radius: 0rem;
+}
+
+/* Dark page background behind the site (overscroll / body gap flash fix) */
+body:has(.theme-autocar) {
+  background: #0c0c0e;
 }
 
 @theme inline {
@@ -53,8 +99,19 @@
   --color-success: var(--success);
   --color-rating: var(--rating);
 
+  --color-muted-2: var(--muted-2);
+  --color-border-strong: var(--border-strong);
+  --color-border-soft: var(--border-soft);
+  --color-whatsapp: var(--whatsapp);
+  --color-whatsapp-600: var(--whatsapp-600);
+  --color-whatsapp-dark: var(--whatsapp-dark);
+  --color-whatsapp-dark-600: var(--whatsapp-dark-600);
+  --color-error: var(--error);
+
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-oswald), "Oswald", sans-serif;
+  --font-body: var(--font-hanken), "Hanken Grotesk", system-ui, sans-serif;
 
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 0.35rem);

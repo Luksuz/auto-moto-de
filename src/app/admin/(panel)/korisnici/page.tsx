@@ -13,11 +13,20 @@ export default async function KorisniciPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight">Korisnici</h1>
+      <div>
+        <div className="mb-2 font-display text-[12px] uppercase tracking-[4px] text-primary">
+          Administracija
+        </div>
+        <h1 className="font-display text-2xl font-semibold uppercase">
+          Korisnici
+        </h1>
+      </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Novi korisnik</CardTitle>
+          <CardTitle className="font-display text-base uppercase tracking-[2px]">
+            Novi korisnik
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <UserCreateForm />
@@ -28,7 +37,7 @@ export default async function KorisniciPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-surface-2 text-left text-xs uppercase tracking-wide text-muted">
+              <tr className="border-b border-border bg-surface-2 text-left text-[11px] uppercase tracking-[1.5px] text-muted-2">
                 <th className="px-4 py-3 font-semibold">Korisnik</th>
                 <th className="px-4 py-3 font-semibold">Telefon</th>
                 <th className="px-4 py-3 font-semibold">Status</th>

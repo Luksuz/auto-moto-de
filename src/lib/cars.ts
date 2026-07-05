@@ -112,10 +112,12 @@ export async function getCars(filters: CarFilters = {}) {
 
   const total = cars.length;
   const pages = Math.max(1, Math.ceil(total / perPage));
-  const start = (page - 1) * perPage;
+  // Clamp out-of-range pages (stale bookmarks after inventory shrinks).
+  const safePage = Math.min(page, pages);
+  const start = (safePage - 1) * perPage;
   const items = cars.slice(start, start + perPage);
 
-  return { items, total, page, pages, perPage };
+  return { items, total, page: safePage, pages, perPage };
 }
 
 export async function getFeaturedCars(limit = 4): Promise<CarWithImages[]> {

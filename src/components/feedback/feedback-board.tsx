@@ -74,7 +74,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItemDTO[] }) {
 
   return (
     <div>
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3 rounded-xl border border-border bg-surface p-4">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3 border border-border bg-surface p-4">
         <div className="w-full max-w-xs">
           <label className="mb-1.5 block text-xs font-medium text-muted">
             Tvoje ime (potpis uz komentare)
@@ -85,7 +85,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItemDTO[] }) {
             placeholder="npr. Luka ili Klijent"
           />
         </div>
-        <Button onClick={() => setAdding(true)} variant="accent">
+        <Button onClick={() => setAdding(true)} variant="primary">
           <Plus className="size-4" /> Nova stavka
         </Button>
       </div>
@@ -105,7 +105,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItemDTO[] }) {
         {COLUMNS.map((col) => {
           const colItems = items.filter((i) => i.status === col.status);
           return (
-            <div key={col.status} className={cn("rounded-xl p-3", col.tint)}>
+            <div key={col.status} className={cn("border border-border-soft p-3", col.tint)}>
               <div className="mb-3 flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
                   <span className={cn("size-2.5 rounded-full", col.dot)} />
@@ -162,7 +162,7 @@ function NewItemForm({
   }
 
   return (
-    <div className="mb-5 rounded-xl border border-border bg-surface p-4">
+    <div className="mb-5 border border-border bg-surface p-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="font-semibold">Nova stavka</h3>
         <button onClick={onClose} className="text-muted hover:text-foreground">
@@ -181,7 +181,7 @@ function NewItemForm({
           onChange={(e) => setBody(e.target.value)}
           placeholder="Detaljniji opis (opcionalno)…"
         />
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
         <div className="flex gap-2">
           <Button onClick={submit} disabled={pending || !title.trim()}>
             {pending ? "Spremam…" : "Dodaj stavku"}
@@ -238,13 +238,13 @@ function FeedbackCard({
   }
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-3 shadow-sm">
+    <div className="border border-border bg-surface p-3">
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-sm font-semibold leading-snug">{item.title}</h3>
         <button
           onClick={remove}
           disabled={pending}
-          className="shrink-0 text-muted hover:text-red-600"
+          className="shrink-0 text-muted hover:text-error"
           aria-label="Obriši"
         >
           <Trash2 className="size-4" />
@@ -296,7 +296,7 @@ function FeedbackCard({
       {open && (
         <div className="mt-3 space-y-3 border-t border-border pt-3">
           {item.comments.map((c) => (
-            <div key={c.id} className="rounded-lg bg-surface-2 p-2.5">
+            <div key={c.id} className="bg-surface-2 p-2.5">
               <div className="mb-1 flex items-center gap-2 text-[11px] text-muted">
                 <span className="font-semibold text-foreground/80">{c.author}</span>
                 <span>•</span>

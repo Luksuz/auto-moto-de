@@ -19,7 +19,9 @@ const leadSchema = z.object({
     .email("Unesite ispravnu e-mail adresu.")
     .optional()
     .or(z.literal("")),
-  message: z.string().trim().max(2000).optional().or(z.literal("")),
+  // Stores the full composed WhatsApp body (unbounded @db.Text column);
+  // generous cap so long problem descriptions don't silently drop the lead.
+  message: z.string().trim().max(8000).optional().or(z.literal("")),
   carId: z.string().trim().optional().or(z.literal("")),
   type: z.nativeEnum(LeadType).default(LeadType.CONTACT),
 });

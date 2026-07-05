@@ -23,7 +23,7 @@ export function LeadStatusSelect({
     <Select
       value={status}
       disabled={pending}
-      className="h-9 w-40"
+      className="h-9 w-40 bg-background border-border-strong"
       onChange={(e) => {
         const next = e.target.value as LeadStatus;
         startTransition(async () => {

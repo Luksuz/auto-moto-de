@@ -12,11 +12,15 @@ const buttonVariants = cva(
           "bg-primary text-primary-foreground hover:bg-primary-600 shadow-sm",
         accent:
           "bg-accent text-accent-foreground hover:bg-accent-600 shadow-sm shadow-accent/20",
-        navy: "bg-navy text-white hover:bg-navy-700",
+        navy: "bg-navy text-background hover:bg-navy-700",
         outline:
           "border border-border bg-surface text-foreground hover:bg-surface-2",
         ghost: "text-foreground hover:bg-surface-2",
-        whatsapp: "bg-[#25D366] text-white hover:bg-[#1da851] shadow-sm",
+        whatsapp: "bg-whatsapp text-white hover:bg-whatsapp-600 rounded-[8px]",
+        whatsappDark:
+          "bg-whatsapp-dark text-white hover:bg-whatsapp-dark-600 rounded-[8px]",
+        goldOutline:
+          "border border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground font-display font-semibold uppercase tracking-[2px]",
         danger: "bg-red-600 text-white hover:bg-red-700",
         link: "text-primary underline-offset-4 hover:underline",
       },

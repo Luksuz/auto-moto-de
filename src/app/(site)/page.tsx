@@ -1,43 +1,33 @@
 import type { Metadata } from "next";
-import { Hero } from "@/components/landing/hero";
-import { TrustBar } from "@/components/landing/trust-bar";
-import { FeaturedVehicles } from "@/components/landing/featured-vehicles";
-import { FinancingBand } from "@/components/landing/financing-band";
-import { PurchaseProcess } from "@/components/landing/purchase-process";
-import { SocialProof } from "@/components/landing/social-proof";
-import { FinalCta } from "@/components/landing/final-cta";
-import { StickyCta } from "@/components/landing/sticky-cta";
-import { getFeaturedCars, getLatestCars, getFilterFacets } from "@/lib/cars";
+import { Hero } from "@/components/home/hero";
+import { UspStrip } from "@/components/home/usp-strip";
+import { FeaturedCars } from "@/components/home/featured-cars";
+import { ServiceTeasers } from "@/components/home/service-teasers";
+import { getFeaturedCars, getLatestCars } from "@/lib/cars";
+import { getT } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
-  title: "Rabljena vozila iz Njemačke uz financiranje 100% online",
+  title: "AUTOCAR EU — Vozila iz Njemačke i Austrije",
   description:
-    "Pronađi svoj auto iz Njemačke uz financiranje 100% online — 0% učešća i odobrenje za 24h za sve zaposlene u Njemačkoj. Provjerena vozila, EU porijeklo, garancija.",
+    "Osam godina povjerenja, preko 350 provjerenih vozila na stanju i garancija do 3 godine. Financiranje dostupno svima koji rade u Njemačkoj i Austriji.",
   alternates: { canonical: "/" },
 };
 
 export default async function HomePage() {
-  const [featured, facets] = await Promise.all([
-    getFeaturedCars(4),
-    getFilterFacets(),
+  const [{ t, locale }, featured] = await Promise.all([
+    getT(),
+    getFeaturedCars(3),
   ]);
 
-  // Fall back to latest cars if nothing is explicitly featured.
-  const featuredCars =
-    featured.length >= 4 ? featured : await getLatestCars(4);
+  // Fall back to the latest cars if fewer than 3 are explicitly featured.
+  const cars = featured.length >= 3 ? featured : await getLatestCars(3);
 
   return (
     <>
-      <Hero brands={facets.brands} modelsByBrand={facets.modelsByBrand} />
-      <TrustBar />
-      <FeaturedVehicles cars={featuredCars} />
-      <FinancingBand />
-      <PurchaseProcess />
-      <SocialProof />
-      <FinalCta />
-      {/* Spacer so the sticky mobile bar never covers footer content. */}
-      <div className="h-16 lg:hidden" aria-hidden />
-      <StickyCta />
+      <Hero t={t} />
+      <UspStrip t={t} />
+      <FeaturedCars t={t} locale={locale} cars={cars} />
+      <ServiceTeasers t={t} />
     </>
   );
 }

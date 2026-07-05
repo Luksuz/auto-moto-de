@@ -105,19 +105,19 @@ export function ImageManager({
         }}
         onClick={() => inputRef.current?.click()}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface-2/50 px-6 py-8 text-center transition-colors hover:border-primary/50",
-          dragOver && "border-primary bg-primary/5",
+          "flex cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-border-strong px-6 py-8 text-center text-muted-2 transition-colors hover:border-primary hover:text-primary",
+          dragOver && "border-primary bg-primary/5 text-primary",
         )}
       >
         {uploading ? (
           <Loader2 className="size-6 animate-spin text-primary" />
         ) : (
-          <Upload className="size-6 text-muted" />
+          <Upload className="size-6" />
         )}
         <div className="text-sm font-medium">
           {uploading ? "Prijenos u tijeku..." : "Povucite slike ili kliknite za odabir"}
         </div>
-        <div className="text-xs text-muted">JPG, PNG, WEBP, AVIF — do 15 MB</div>
+        <div className="text-xs opacity-80">JPG, PNG, WEBP, AVIF — do 15 MB</div>
         <input
           ref={inputRef}
           type="file"
@@ -132,7 +132,7 @@ export function ImageManager({
       </div>
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="border border-error/40 bg-surface-2 px-3 py-2 text-sm text-error">
           {error}
         </p>
       )}
@@ -144,7 +144,7 @@ export function ImageManager({
               key={img.id ?? img.key}
               className={cn(
                 "group relative overflow-hidden rounded-lg border bg-surface",
-                img.isPrimary ? "border-primary ring-2 ring-primary/30" : "border-border",
+                img.isPrimary ? "border-primary" : "border-border",
               )}
             >
               <div className="relative aspect-[4/3] bg-surface-2">
@@ -168,7 +168,7 @@ export function ImageManager({
                     type="button"
                     onClick={() => move(idx, -1)}
                     disabled={idx === 0}
-                    className="rounded p-1 text-muted hover:bg-surface-2 disabled:opacity-30"
+                    className="p-1 text-muted hover:bg-surface-2 disabled:opacity-30"
                     title="Pomakni gore"
                   >
                     <ArrowUp className="size-4" />
@@ -177,7 +177,7 @@ export function ImageManager({
                     type="button"
                     onClick={() => move(idx, 1)}
                     disabled={idx === images.length - 1}
-                    className="rounded p-1 text-muted hover:bg-surface-2 disabled:opacity-30"
+                    className="p-1 text-muted hover:bg-surface-2 disabled:opacity-30"
                     title="Pomakni dolje"
                   >
                     <ArrowDown className="size-4" />
@@ -188,7 +188,7 @@ export function ImageManager({
                     type="button"
                     onClick={() => setPrimary(idx)}
                     disabled={img.isPrimary}
-                    className="rounded p-1 text-muted hover:bg-surface-2 disabled:opacity-30"
+                    className="p-1 text-muted hover:bg-surface-2 disabled:opacity-30"
                     title="Postavi kao glavnu"
                   >
                     <Star className="size-4" />
@@ -196,7 +196,7 @@ export function ImageManager({
                   <button
                     type="button"
                     onClick={() => remove(idx)}
-                    className="rounded p-1 text-red-600 hover:bg-red-50"
+                    className="p-1 text-error hover:bg-error/10"
                     title="Obriši"
                   >
                     <Trash2 className="size-4" />
