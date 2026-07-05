@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { LeadType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { sendLeadNotification } from "@/lib/mailer";
 
 const leadSchema = z.object({
   name: z
@@ -43,7 +44,7 @@ export async function createLead(
   const data = parsed.data;
 
   try {
-    await prisma.lead.create({
+    const lead = await prisma.lead.create({
       data: {
         name: data.name,
         phone: data.phone,
@@ -53,6 +54,11 @@ export async function createLead(
         carId: data.carId ? data.carId : null,
       },
     });
+    // Fire-and-forget — a mail failure must never block the visitor's
+    // WhatsApp handoff; the lead is already saved and visible in admin.
+    sendLeadNotification(lead).catch((err) =>
+      console.error("lead mail failed:", err),
+    );
     return { ok: true };
   } catch {
     return {
