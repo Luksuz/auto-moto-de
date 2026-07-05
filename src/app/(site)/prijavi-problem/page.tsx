@@ -3,9 +3,10 @@ import { getT } from "@/lib/i18n/server";
 import { ProblemForm } from "@/components/site/forms/problem-form";
 
 export const metadata: Metadata = {
-  title: "Prijavi problem — AUTOCAR EU",
+  title: "Prijavi problem",
   description:
     "Imate problem s vozilom? Ispunite obrazac i naš tim će vam se javiti u najkraćem mogućem roku.",
+  alternates: { canonical: "/prijavi-problem" },
 };
 
 export default async function PrijaviProblemPage() {

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DEALER, whatsappLink } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Tijek preuzimanja — AUTOCAR EU",
+  title: "Tijek preuzimanja",
   description:
     "Kako izgleda preuzimanje vozila — od dogovorenog termina do predaje ključeva.",
 };

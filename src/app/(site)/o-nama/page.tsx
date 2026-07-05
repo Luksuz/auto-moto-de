@@ -3,9 +3,10 @@ import { DEALER, whatsappLink } from "@/lib/constants";
 import { getT } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
-  title: "O nama — AUTOCAR EU",
+  title: "O nama",
   description:
     "AUTOCAR EU — od 2018. prodajemo provjerena vozila iz Njemačke i Austrije. Preko 350 vozila na stanju, garancija do 3 godine i tisuće zadovoljnih kupaca.",
+  alternates: { canonical: "/o-nama" },
 };
 
 export default async function ONamaPage() {

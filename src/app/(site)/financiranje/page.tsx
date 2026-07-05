@@ -5,9 +5,10 @@ import { getCarBySlug } from "@/lib/cars";
 import { FinancingForm } from "@/components/site/forms/financing-form";
 
 export const metadata: Metadata = {
-  title: "Financiranje — AUTOCAR EU",
+  title: "Financiranje",
   description:
     "Pošaljite upit za financiranje vozila — najpovoljniji uvjeti za sve zaposlene u Njemačkoj i Austriji, brza obrada zahtjeva.",
+  alternates: { canonical: "/financiranje" },
 };
 
 export default async function FinanciranjePage({

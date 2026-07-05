@@ -9,9 +9,10 @@ import { CarFilters } from "@/components/car/car-filters";
 import { Pagination } from "@/components/car/pagination";
 
 export const metadata: Metadata = {
-  title: "Ponuda vozila — AUTOCAR EU",
+  title: "Ponuda vozila",
   description:
     "Pregledajte ponudu provjerenih vozila iz Njemačke i Austrije — AUTOCAR EU. Filtrirajte po marki, modelu, godištu, cijeni i više.",
+  alternates: { canonical: "/vozila" },
 };
 
 type SearchParams = Record<string, string | string[] | undefined>;

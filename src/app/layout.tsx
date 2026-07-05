@@ -36,6 +36,10 @@ export const metadata: Metadata = {
     title: "AUTOCAR EU — Vozila iz Njemačke i Austrije",
     description:
       "Preko 350 provjerenih vozila na stanju, garancija do 3 godine i financiranje za zaposlene u Njemačkoj i Austriji.",
+    images: [{ url: "/brand/og.jpg", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
   },
 };
 

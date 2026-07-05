@@ -6,6 +6,7 @@ import { getCarBySlug, getSimilarCars, primaryImage } from "@/lib/cars";
 import type { CarWithRelations } from "@/lib/cars";
 import { CarCard } from "@/components/car/car-card";
 import { CarGallery } from "@/components/car/car-gallery";
+import { VehicleJsonLd } from "@/components/site/structured-data";
 import { Button } from "@/components/ui/button";
 import { formatPrice, formatKm, estimateMonthlyRate } from "@/lib/utils";
 import { DEALER, whatsappLink } from "@/lib/constants";
@@ -30,14 +31,15 @@ export async function generateMetadata(props: {
 
   const img = primaryImage(car);
   const description = car.description
-    ? car.description.slice(0, 160)
+    ? car.description.replace(/\s+/g, " ").trim().slice(0, 160)
     : `${car.title} — ${formatPrice(car.priceEur)}, ${car.firstRegistration}, ${formatKm(
         car.mileageKm,
-      )}. Financiranje 100% online uz 0% učešća.`;
+      )}. Provjerena vozila iz Njemačke i Austrije uz mogućnost financiranja.`;
 
   return {
-    title: `${car.title} — ${formatPrice(car.priceEur)} | AUTOCAR EU`,
+    title: `${car.title} — ${formatPrice(car.priceEur)}`,
     description,
+    alternates: { canonical: `/vozila/${car.slug}` },
     openGraph: {
       title: car.title,
       description,
@@ -113,6 +115,7 @@ export default async function CarDetailPage(props: {
 
   return (
     <div className="px-5 py-11 sm:px-10 lg:px-14">
+      <VehicleJsonLd car={car} />
       <Link
         href="/vozila"
         className="mb-6 inline-block text-[14px] font-semibold uppercase tracking-[1.5px] text-muted-2 hover:text-primary"

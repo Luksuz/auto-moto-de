@@ -7,7 +7,7 @@ import { getFeaturedCars, getLatestCars } from "@/lib/cars";
 import { getT } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
-  title: "AUTOCAR EU — Vozila iz Njemačke i Austrije",
+  title: { absolute: "AUTOCAR EU — Vozila iz Njemačke i Austrije" },
   description:
     "Osam godina povjerenja, preko 350 provjerenih vozila na stanju i garancija do 3 godine. Financiranje dostupno svima koji rade u Njemačkoj i Austriji.",
   alternates: { canonical: "/" },

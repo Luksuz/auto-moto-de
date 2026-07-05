@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { DEALER } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Impressum — AUTOCAR EU",
+  title: "Impressum",
   description: "Pravne informacije i podaci o tvrtki AUTOCAR EU.",
 };
 

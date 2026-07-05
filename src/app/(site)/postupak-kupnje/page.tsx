@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { DEALER, FINANCING, whatsappLink } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Postupak kupnje — AUTOCAR EU",
+  title: "Postupak kupnje",
   description:
     "Tri jednostavna koraka do vašeg vozila: informativni razgovor, online zahtjev za financiranjem i preuzimanje vozila.",
 };

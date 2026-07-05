@@ -61,16 +61,26 @@ export async function SiteFooter() {
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 border-t border-border-soft/50 pt-4">
-        {INFO_NAV.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="transition-colors hover:text-primary"
-          >
-            {t[item.key]}
-          </Link>
-        ))}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-border-soft/50 pt-4">
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          {INFO_NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="transition-colors hover:text-primary"
+            >
+              {t[item.key]}
+            </Link>
+          ))}
+        </div>
+        <a
+          href="https://mindx.global"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[12.5px] transition-colors hover:text-primary"
+        >
+          made by MindX Global with <span className="text-error">❤</span>
+        </a>
       </div>
     </footer>
   );

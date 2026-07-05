@@ -7,9 +7,10 @@ import { getT } from "@/lib/i18n/server";
 import { InsuranceForm } from "@/components/site/forms/insurance-form";
 
 export const metadata: Metadata = {
-  title: "Osiguranje — AUTOCAR EU",
+  title: "Osiguranje",
   description:
     "Auto osiguranje, kasko i sva ostala osiguranja za Njemačku i Austriju — uz osobnog savjetnika koji govori vaš jezik.",
+  alternates: { canonical: "/osiguranje" },
 };
 
 export default async function OsiguranjePage() {

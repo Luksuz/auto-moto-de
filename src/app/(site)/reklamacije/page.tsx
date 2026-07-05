@@ -3,7 +3,7 @@ import { Phone, Mail } from "lucide-react";
 import { DEALER, whatsappLink } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Reklamacije — AUTOCAR EU",
+  title: "Reklamacije",
   description:
     "Kako podnijeti reklamaciju i kontakt za prigovore — AUTOCAR EU.",
 };

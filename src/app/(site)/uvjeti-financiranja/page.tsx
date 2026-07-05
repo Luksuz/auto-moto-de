@@ -6,7 +6,7 @@ import { LeadForm } from "@/components/site/lead-form";
 import { DEALER, FINANCING } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Uvjeti financiranja — AUTOCAR EU",
+  title: "Uvjeti financiranja",
   description:
     "Financiranje vozila uz kamatu od 5,99% do 8,99%, 0% učešća i odobrenje banke unutar jednog radnog dana.",
 };
