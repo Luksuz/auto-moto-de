@@ -212,18 +212,3 @@ export async function deleteCar(id: string): Promise<CarActionState> {
   return { ok: true };
 }
 
-export async function togglePublish(
-  id: string,
-  published: boolean,
-): Promise<CarActionState> {
-  await requireUser();
-  const car = await prisma.car.update({
-    where: { id },
-    data: { published },
-    select: { slug: true },
-  });
-  revalidatePath("/admin/vozila");
-  revalidatePath("/vozila");
-  revalidatePath(`/vozila/${car.slug}`);
-  return { ok: true };
-}

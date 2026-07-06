@@ -16,7 +16,6 @@ import {
   PRICE_RATING_LABEL,
   toOptions,
 } from "@/lib/constants";
-import { slugify } from "@/lib/utils";
 import { createCar, updateCar } from "@/lib/actions/cars";
 import type { CarInput } from "@/lib/validators";
 import {
@@ -29,10 +28,8 @@ export type CarFormValues = {
   title: string;
   brand: string;
   model: string;
-  slug: string;
   priceEur: string;
   priceRating: string;
-  published: boolean;
   featured: boolean;
   assignedAgentId: string;
   bodyType: string;
@@ -60,10 +57,8 @@ const EMPTY: CarFormValues = {
   title: "",
   brand: "",
   model: "",
-  slug: "",
   priceEur: "",
   priceRating: "",
-  published: false,
   featured: false,
   assignedAgentId: "",
   bodyType: "LIMUZINA",
@@ -136,9 +131,6 @@ export function CarForm({
   const [equipment, setEquipment] = useState<string[]>(initialEquipment);
   const [equipInput, setEquipInput] = useState("");
   const [images, setImages] = useState<ManagedImage[]>(initialImages);
-  const [slugTouched, setSlugTouched] = useState(
-    Boolean(initialValues?.slug),
-  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -148,11 +140,7 @@ export function CarForm({
   }
 
   function onTitleChange(value: string) {
-    setValues((v) => ({
-      ...v,
-      title: value,
-      slug: slugTouched ? v.slug : slugify(value),
-    }));
+    setValues((v) => ({ ...v, title: value }));
   }
 
   function addEquip(raw: string) {
@@ -254,19 +242,6 @@ export function CarForm({
               placeholder="320d"
             />
           </Field>
-          <div className="sm:col-span-2">
-            <Field label="Slug (URL)" htmlFor="slug" error={errors.slug}>
-              <Input className="bg-background border-border-strong"
-                id="slug"
-                value={values.slug}
-                onChange={(e) => {
-                  setSlugTouched(true);
-                  set("slug", e.target.value);
-                }}
-                placeholder="bmw-320d-touring"
-              />
-            </Field>
-          </div>
           <Field
             label="Cijena (EUR)"
             htmlFor="priceEur"
@@ -311,15 +286,6 @@ export function CarForm({
             </Select>
           </Field>
           <div className="flex items-end gap-6">
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <input
-                type="checkbox"
-                className="size-4 accent-primary"
-                checked={values.published}
-                onChange={(e) => set("published", e.target.checked)}
-              />
-              Objavljeno
-            </label>
             <label className="flex items-center gap-2 text-sm font-medium">
               <input
                 type="checkbox"

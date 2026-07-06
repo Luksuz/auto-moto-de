@@ -207,6 +207,12 @@ async function processPost(post, index) {
       (img) => !have.has(`cars/fb-${slug.slice(0, 60)}-${img.fbid}.jpg`),
     );
     if (missing.length === 0) return { skipped: `up to date: ${slug}` };
+    // A re-posted listing gets brand-new photo ids for the SAME photos —
+    // appending them would duplicate the gallery. Only append when the post
+    // clearly extends what we have (more photos than the car currently has).
+    if (images.length <= exists.images.length) {
+      return { skipped: `duplicate post (re-upload): ${slug}` };
+    }
     const uploaded = await uploadImages(missing, slug, exists.title, have.size);
     await prisma.carImage.createMany({
       data: uploaded.map((img) => ({ ...img, carId: exists.id })),

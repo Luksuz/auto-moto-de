@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth-helpers";
 import { CarForm, type CarFormValues } from "@/components/admin/car-form";
 import type { ManagedImage } from "@/components/admin/image-manager";
+import { DeleteCarButton } from "@/components/admin/car-row-actions";
 
 const s = (v: string | number | null | undefined) =>
   v === null || v === undefined ? "" : String(v);
@@ -35,10 +36,8 @@ export default async function UrediVoziloPage({
     title: car.title,
     brand: car.brand,
     model: car.model,
-    slug: car.slug,
     priceEur: s(car.priceEur),
     priceRating: s(car.priceRating),
-    published: car.published,
     featured: car.featured,
     assignedAgentId: s(car.assignedAgentId),
     bodyType: car.bodyType,
@@ -88,6 +87,9 @@ export default async function UrediVoziloPage({
           <h1 className="truncate font-display text-2xl font-semibold uppercase">
             {car.title}
           </h1>
+        </div>
+        <div className="ml-auto shrink-0">
+          <DeleteCarButton id={car.id} redirectTo="/admin/vozila" />
         </div>
       </div>
       <CarForm

@@ -42,7 +42,7 @@ export const carSchema = z.object({
   brand: z.string().trim().min(1, "Marka je obavezna"),
   model: z.string().trim().min(1, "Model je obavezan"),
   slug: z.preprocess(emptyToNull, z.string().nullish()),
-  published: z.coerce.boolean().default(false),
+  published: z.coerce.boolean().default(true),
   featured: z.coerce.boolean().default(false),
   priceEur: z.coerce
     .number({ message: "Cijena je obavezna" })

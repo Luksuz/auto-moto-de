@@ -117,11 +117,6 @@ export default async function VozilaPage({
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1.5">
-                          {car.published ? (
-                            <Badge variant="success">Objavljeno</Badge>
-                          ) : (
-                            <Badge variant="neutral">Skica</Badge>
-                          )}
                           {car.featured && (
                             <Badge variant="accent">Izdvojeno</Badge>
                           )}
@@ -131,10 +126,7 @@ export default async function VozilaPage({
                         {car.assignedAgent?.name ?? "—"}
                       </td>
                       <td className="px-4 py-3">
-                        <CarRowActions
-                          id={car.id}
-                          published={car.published}
-                        />
+                        <CarRowActions id={car.id} />
                       </td>
                     </tr>
                   );
