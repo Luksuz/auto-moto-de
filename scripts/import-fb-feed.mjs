@@ -6,7 +6,7 @@
 //
 // Usage: node scripts/import-fb-feed.mjs [path/to/fb-feed.json]
 import { readFileSync } from "node:fs";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import sharp from "sharp";
@@ -135,6 +135,38 @@ async function pool(items, limit, worker) {
   return results;
 }
 
+/** Normalize scraped images (old scrapes: string URLs; new: {fbid, url}).
+ *  The FB photo id is the stable dedupe key — parse it from the filename
+ *  (rand_<photoFbid>_rand_n.jpg) when the scraper didn't provide it. */
+function normalizeImages(images) {
+  return (images ?? [])
+    .map((img, i) => {
+      const url = typeof img === "string" ? img : img.url;
+      let fbid = typeof img === "object" ? img.fbid : null;
+      if (!fbid) fbid = url.match(/\/\d+_(\d{10,})_\d+_n\.jpg/)?.[1] ?? `idx${i}`;
+      return { fbid, url, order: i };
+    })
+    .filter((img, i, arr) => arr.findIndex((x) => x.fbid === img.fbid) === i);
+}
+
+async function uploadImages(images, slug, title, startOrder = 0) {
+  const rows = await Promise.all(
+    images.map((img, i) => {
+      const key = `cars/fb-${slug.slice(0, 60)}-${img.fbid}.jpg`;
+      return withRetry(() => importImage(img.url, key), `img ${slug}/${img.fbid}`)
+        .then((publicSrc) => ({
+          url: publicSrc,
+          key,
+          alt: `${title} — slika ${startOrder + i + 1}`,
+          sortOrder: startOrder + i,
+          isPrimary: startOrder + i === 0,
+        }))
+        .catch(() => null);
+    }),
+  );
+  return rows.filter(Boolean);
+}
+
 async function processPost(post, index) {
   if (post.date && new Date(post.date) < CUTOFF) return { skipped: "before cutoff" };
 
@@ -145,21 +177,44 @@ async function processPost(post, index) {
 
   const reg = car.first_registration || "01/2000";
   const slug = slugify(`${car.title} ${reg.replace("/", "")}`);
+  const images = normalizeImages(post.images);
 
-  const exists = await prisma.car.findUnique({ where: { slug }, select: { id: true } });
-  if (exists) return { skipped: `exists: ${slug}` };
+  const exists = await prisma.car.findUnique({
+    where: { slug },
+    select: { id: true, title: true, images: { select: { id: true, key: true } } },
+  });
 
-  // Download + upload all images of this post in parallel.
-  const uploaded = (
-    await Promise.all(
-      post.images.slice(0, 10).map((url, i) => {
-        const key = `cars/fb-${slug.slice(0, 60)}-${String(i + 1).padStart(2, "0")}.jpg`;
-        return withRetry(() => importImage(url, key), `img ${slug}/${i + 1}`)
-          .then((publicSrc) => ({ url: publicSrc, key, order: i }))
-          .catch(() => null);
-      }),
-    )
-  ).filter(Boolean);
+  if (exists) {
+    // Old-style numbered keys (cars/fb-<slug>-01.jpg) → replace with the
+    // full fbid-keyed set; otherwise only add photos we don't have yet.
+    const oldStyle = exists.images.filter((i) => /-\d{2}\.jpg$/.test(i.key));
+    if (oldStyle.length > 0) {
+      const uploaded = await uploadImages(images, slug, exists.title);
+      if (uploaded.length === 0) return { skipped: `no images fetchable: ${slug}` };
+      await prisma.carImage.deleteMany({ where: { carId: exists.id } });
+      await Promise.all(
+        oldStyle.map((i) =>
+          s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: i.key })).catch(() => {}),
+        ),
+      );
+      await prisma.carImage.createMany({
+        data: uploaded.map((img) => ({ ...img, carId: exists.id })),
+      });
+      return { created: `${slug} (images replaced)`, images: uploaded.length };
+    }
+    const have = new Set(exists.images.map((i) => i.key));
+    const missing = images.filter(
+      (img) => !have.has(`cars/fb-${slug.slice(0, 60)}-${img.fbid}.jpg`),
+    );
+    if (missing.length === 0) return { skipped: `up to date: ${slug}` };
+    const uploaded = await uploadImages(missing, slug, exists.title, have.size);
+    await prisma.carImage.createMany({
+      data: uploaded.map((img) => ({ ...img, carId: exists.id })),
+    });
+    return { created: `${slug} (+${uploaded.length} new images)`, images: uploaded.length };
+  }
+
+  const uploaded = await uploadImages(images, slug, car.title);
 
   await prisma.car.create({
     data: {
@@ -181,15 +236,7 @@ async function processPost(post, index) {
       description: car.description_hr || null,
       warranty: car.warranty || null,
       equipment: car.equipment ?? [],
-      images: {
-        create: uploaded.map((img) => ({
-          url: img.url,
-          key: img.key,
-          alt: `${car.title} — slika ${img.order + 1}`,
-          sortOrder: img.order,
-          isPrimary: img.order === 0,
-        })),
-      },
+      images: { create: uploaded },
     },
   });
 

@@ -70,21 +70,29 @@
       const msg = article.querySelector('[data-ad-comet-preview="message"], [data-ad-preview="message"]');
       const text = msg ? msg.innerText : "";
 
-      const images = [...article.querySelectorAll('a[href*="/photo/"] img')]
-        .map((img) => img.src)
-        .filter((src) => src && src.includes("scontent"));
+      const images = [...article.querySelectorAll('a[href*="/photo/"]')]
+        .map((a) => {
+          const img = a.querySelector("img");
+          if (!img || !img.src || !img.src.includes("scontent")) return null;
+          const fbid = new URL(a.href).searchParams.get("fbid");
+          const set = new URL(a.href).searchParams.get("set");
+          return { fbid, set, url: img.src };
+        })
+        .filter(Boolean);
 
       const existing = posts.get(url);
       if (!existing) {
-        posts.set(url, { url, dateLabel, date: date ? date.toISOString() : null, text, images: [...new Set(images)] });
+        posts.set(url, { url, dateLabel, date: date ? date.toISOString() : null, text, images });
         added++;
         console.log(
           `  + [${date ? date.toLocaleDateString("hr-HR") : `?? "${dateLabel}"`}] ${text.replace(/\s+/g, " ").slice(0, 60)}`,
         );
       } else {
-        // keep the longest text (post may have been expanded since) + union images
+        // keep the longest text (post may have been expanded since) + union images by fbid
         if (text.length > existing.text.length) existing.text = text;
-        existing.images = [...new Set([...existing.images, ...images])];
+        for (const img of images) {
+          if (!existing.images.some((e) => e.fbid === img.fbid)) existing.images.push(img);
+        }
         if (!existing.date && date) existing.date = date.toISOString();
       }
     }
@@ -120,6 +128,71 @@
     .filter((p) => p.text && p.text.length > 40);
 
   console.log(`✅ ${result.length} posts collected (of ${posts.size} seen)`);
+  console.log("⏳ phase 2: walking photo sets to collect ALL images per post…");
+
+  // Walk the photo viewer set (set=pcb.<postId>) via authenticated fetches:
+  // each photo page embeds the full-res image URI and the next photo's id.
+  const IMG_RE = /"image":\{"uri":"(https:\\\/\\\/scontent[^"]+?)"/;
+  const NEXT_RES = [
+    /"nextMediaAfterNodeId"\s*:\s*\{[^{}]*?"id":"(\d+)"/,
+    /"nextMedia"\s*:\s*\{[^{}]*?"id":"(\d+)"/,
+  ];
+  const unesc = (s) => s.replace(/\\\//g, "/").replace(/\\u0025/g, "%").replace(/&amp;/g, "&");
+
+  async function fetchPhoto(fbid, set) {
+    const res = await fetch(
+      `https://www.facebook.com/photo/?fbid=${fbid}&set=${encodeURIComponent(set)}`,
+      { credentials: "include" },
+    );
+    const html = await res.text();
+    const img = html.match(IMG_RE);
+    let nextId = null;
+    for (const re of NEXT_RES) {
+      const m = html.match(re);
+      if (m && m[1] !== fbid) { nextId = m[1]; break; }
+    }
+    return { url: img ? unesc(img[1]) : null, nextId };
+  }
+
+  async function walkSet(post) {
+    const first = post.images[0];
+    if (!first || !first.fbid || !first.set) return;
+    const seen = new Set(post.images.map((i) => i.fbid));
+    const all = [];
+    let fbid = first.fbid;
+    for (let hop = 0; hop < 30 && fbid; hop++) {
+      try {
+        const { url, nextId } = await fetchPhoto(fbid, first.set);
+        if (url) all.push({ fbid, set: first.set, url });
+        if (!nextId || all.some((i) => i.fbid === nextId) || (all.length && nextId === first.fbid)) break;
+        fbid = nextId;
+      } catch {
+        break;
+      }
+    }
+    // Use the walked set if it found more than the grid had; else keep grid images.
+    if (all.length > post.images.length) post.images = all;
+    else for (const i of all) if (!seen.has(i.fbid)) post.images.push(i);
+  }
+
+  {
+    let done = 0;
+    let next = 0;
+    await Promise.all(
+      Array.from({ length: 4 }, async () => {
+        while (next < result.length) {
+          const post = result[next++];
+          await walkSet(post);
+          done++;
+          if (done % 5 === 0 || done === result.length)
+            console.log(`  photo sets: ${done}/${result.length}`);
+        }
+      }),
+    );
+  }
+
+  const totalImgs = result.reduce((n, p) => n + p.images.length, 0);
+  console.log(`✅ ${totalImgs} images across ${result.length} posts`);
 
   const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
