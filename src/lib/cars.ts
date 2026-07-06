@@ -129,15 +129,6 @@ export async function getFeaturedCars(limit = 4): Promise<CarWithImages[]> {
   });
 }
 
-export async function getLatestCars(limit = 8): Promise<CarWithImages[]> {
-  return prisma.car.findMany({
-    where: { published: true },
-    orderBy: { createdAt: "desc" },
-    take: limit,
-    include: { images: { orderBy: imageOrder } },
-  });
-}
-
 export async function getCarBySlug(
   slug: string,
 ): Promise<CarWithRelations | null> {

@@ -3,7 +3,7 @@ import { Hero } from "@/components/home/hero";
 import { UspStrip } from "@/components/home/usp-strip";
 import { FeaturedCars } from "@/components/home/featured-cars";
 import { ServiceTeasers } from "@/components/home/service-teasers";
-import { getFeaturedCars, getLatestCars } from "@/lib/cars";
+import { getFeaturedCars } from "@/lib/cars";
 import { getT } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
@@ -14,13 +14,10 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [{ t, locale }, featured] = await Promise.all([
+  const [{ t, locale }, cars] = await Promise.all([
     getT(),
     getFeaturedCars(3),
   ]);
-
-  // Fall back to the latest cars if fewer than 3 are explicitly featured.
-  const cars = featured.length >= 3 ? featured : await getLatestCars(3);
 
   return (
     <>
