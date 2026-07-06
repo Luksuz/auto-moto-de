@@ -64,7 +64,7 @@ export function UserCreateForm() {
             name="email"
             type="email"
             required
-            placeholder="ivan@kupiauto.de"
+            placeholder="agent@autocareu.de"
             className="bg-background border-border-strong"
           />
         </div>

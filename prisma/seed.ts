@@ -216,7 +216,7 @@ const sampleCars: Omit<Prisma.CarCreateInput, "slug" | "assignedAgent">[] = [
 ];
 
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@kupiauto.de";
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@autocareu.de";
   const adminPassword = process.env.ADMIN_PASSWORD || "KupiAuto2026!";
 
   const admin = await prisma.user.upsert({
@@ -231,25 +231,12 @@ async function main() {
   });
   console.log(`Admin: ${admin.email}`);
 
-  const agent = await prisma.user.upsert({
-    where: { email: "ivan@kupiauto.de" },
-    update: {},
-    create: {
-      email: "ivan@kupiauto.de",
-      name: "Ivan Vidović",
-      phone: "+49 177 4012397",
-      passwordHash: await bcrypt.hash("Agent2026!", 10),
-      role: "AGENT",
-    },
-  });
-  console.log(`Agent: ${agent.email}`);
-
   for (const car of sampleCars) {
     const slug = slugify(car.title) + "-" + car.firstRegistration.replace("/", "");
     await prisma.car.upsert({
       where: { slug },
       update: {},
-      create: { ...car, slug, assignedAgent: { connect: { id: agent.id } } },
+      create: { ...car, slug },
     });
   }
   console.log(`Seeded ${sampleCars.length} cars.`);
