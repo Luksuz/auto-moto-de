@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { DEALER, INFO_NAV, whatsappLink } from "@/lib/constants";
 import { getT } from "@/lib/i18n/server";
+import { WhatsAppIcon, FacebookIcon } from "@/components/site/icons";
 
 export async function SiteFooter() {
   const { t } = await getT();
@@ -28,24 +29,27 @@ export async function SiteFooter() {
             href={DEALER.facebook}
             target="_blank"
             rel="noopener noreferrer"
-            className="transition-colors hover:text-primary"
+            className="inline-flex items-center gap-1.5 transition-colors hover:text-primary"
           >
+            <FacebookIcon className="size-3.5" />
             {t.fbGroup}
           </a>
           <a
             href={whatsappLink(undefined, DEALER.whatsappDe)}
             target="_blank"
             rel="noopener noreferrer"
-            className="transition-colors hover:text-primary"
+            className="inline-flex items-center gap-1.5 transition-colors hover:text-primary"
           >
+            <WhatsAppIcon className="size-3.5" />
             WhatsApp DE {DEALER.whatsappDePretty}
           </a>
           <a
             href={whatsappLink(undefined, DEALER.whatsappHr)}
             target="_blank"
             rel="noopener noreferrer"
-            className="transition-colors hover:text-primary"
+            className="inline-flex items-center gap-1.5 transition-colors hover:text-primary"
           >
+            <WhatsAppIcon className="size-3.5" />
             WhatsApp HR {DEALER.whatsappHrPretty}
           </a>
         </div>

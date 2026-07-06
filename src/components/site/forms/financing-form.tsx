@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -11,6 +10,7 @@ import { useLeadSubmit } from "@/components/site/forms/use-lead-submit";
 import { composeWaMessage } from "@/lib/leads/compose";
 import { DEALER } from "@/lib/constants";
 import { Field, FormShell, PrivacyNote } from "./form-shell";
+import { WhatsAppIcon } from "@/components/site/icons";
 
 const INPUT = "bg-background border-border-strong";
 const LOAN_TERMS = ["12", "24", "36", "48", "60", "72", "84"];
@@ -163,7 +163,7 @@ export function FinancingForm({
           className="w-full"
           disabled={pending}
         >
-          <Phone />
+          <WhatsAppIcon className="size-4" />
           {(pending ? t.sending : t.finSend) + " →"}
         </Button>
         <p className="mt-3 text-center text-[13.5px] text-muted-2">

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Mail, Phone } from "lucide-react";
+import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { INSURANCE_ADVISOR, whatsappLink } from "@/lib/constants";
 import { getT } from "@/lib/i18n/server";
 import { InsuranceForm } from "@/components/site/forms/insurance-form";
+import { WhatsAppIcon } from "@/components/site/icons";
 
 export const metadata: Metadata = {
   title: "Osiguranje",
@@ -38,7 +39,7 @@ export default async function OsiguranjePage() {
             >
               <a href={whatsappLink(undefined, INSURANCE_ADVISOR.whatsappDe)}>
                 <span className="inline-flex items-center gap-2.5">
-                  <Phone /> WhatsApp {t.germany}
+                  <WhatsAppIcon className="size-4" /> WhatsApp {t.germany}
                 </span>
                 <span>{INSURANCE_ADVISOR.whatsappDePretty}</span>
               </a>
@@ -51,7 +52,7 @@ export default async function OsiguranjePage() {
             >
               <a href={whatsappLink(undefined, INSURANCE_ADVISOR.whatsappAt)}>
                 <span className="inline-flex items-center gap-2.5">
-                  <Phone /> WhatsApp {t.austria}
+                  <WhatsAppIcon className="size-4" /> WhatsApp {t.austria}
                 </span>
                 <span>{INSURANCE_ADVISOR.whatsappAtPretty}</span>
               </a>
@@ -81,11 +82,11 @@ export default async function OsiguranjePage() {
             </div>
             <div className="text-[13.5px] leading-[1.7] text-muted-2">
               <div className="flex items-center gap-2">
-                <Phone className="size-3.5 shrink-0" />
+                <WhatsAppIcon className="size-3.5" />
                 {INSURANCE_ADVISOR.whatsappDePretty} ({t.germany})
               </div>
               <div className="flex items-center gap-2">
-                <Phone className="size-3.5 shrink-0" />
+                <WhatsAppIcon className="size-3.5" />
                 {INSURANCE_ADVISOR.whatsappAtPretty} ({t.austria})
               </div>
               <div className="flex items-center gap-2">

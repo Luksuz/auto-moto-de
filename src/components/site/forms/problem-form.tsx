@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Camera, Phone } from "lucide-react";
+import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +11,7 @@ import { composeWaMessage } from "@/lib/leads/compose";
 import { DEALER } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Field, FormShell, PrivacyNote } from "./form-shell";
+import { WhatsAppIcon } from "@/components/site/icons";
 
 const INPUT = "bg-background border-border-strong";
 
@@ -190,7 +191,7 @@ export function ProblemForm() {
           className="w-full"
           disabled={pending}
         >
-          <Phone />
+          <WhatsAppIcon className="size-4" />
           {(pending ? t.sending : t.probSend) + " →"}
         </Button>
         <p className="mt-3 text-center text-[13.5px] text-muted-2">

@@ -4,11 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X, Phone } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { SITE_NAV, DEALER, whatsappLink } from "@/lib/constants";
 import { useLanguage } from "@/components/site/language-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { WhatsAppIcon } from "@/components/site/icons";
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
@@ -97,7 +98,7 @@ export function SiteHeader() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Phone className="size-4" />
+              <WhatsAppIcon className="size-4" />
               WhatsApp
             </a>
           </Button>

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Phone, Mail, Users } from "lucide-react";
+import { Mail } from "lucide-react";
 import { LeadForm } from "@/components/site/lead-form";
 import { Button } from "@/components/ui/button";
 import { DEALER, whatsappLink } from "@/lib/constants";
+import { WhatsAppIcon, FacebookIcon } from "@/components/site/icons";
 
 export const metadata: Metadata = {
   title: "Termin za preuzimanje",
@@ -28,7 +29,7 @@ export default function TerminZaPreuzimanjePage() {
         </h2>
         <ul className="mt-4 space-y-3 text-sm">
           <li className="flex items-center gap-2.5">
-            <Phone className="size-4 shrink-0 text-primary" />
+            <WhatsAppIcon className="text-primary" />
             <a
               href={whatsappLink(undefined, DEALER.whatsappDe)}
               target="_blank"
@@ -39,7 +40,7 @@ export default function TerminZaPreuzimanjePage() {
             </a>
           </li>
           <li className="flex items-center gap-2.5">
-            <Phone className="size-4 shrink-0 text-primary" />
+            <WhatsAppIcon className="text-primary" />
             <a
               href={whatsappLink(undefined, DEALER.whatsappHr)}
               target="_blank"
@@ -59,7 +60,7 @@ export default function TerminZaPreuzimanjePage() {
             </a>
           </li>
           <li className="flex items-center gap-2.5">
-            <Users className="size-4 shrink-0 text-primary" />
+            <FacebookIcon className="text-primary" />
             <a
               href={DEALER.facebook}
               target="_blank"
@@ -85,7 +86,7 @@ export default function TerminZaPreuzimanjePage() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Phone className="size-4" />
+            <WhatsAppIcon className="size-4" />
             WhatsApp {DEALER.whatsappDePretty}
           </a>
         </Button>

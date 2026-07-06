@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Phone, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { DEALER, whatsappLink } from "@/lib/constants";
+import { WhatsAppIcon } from "@/components/site/icons";
 
 export const metadata: Metadata = {
   title: "Reklamacije",
@@ -49,7 +50,7 @@ export default function ReklamacijePage() {
         </h2>
         <ul className="mt-4 space-y-3 text-sm">
           <li className="flex items-center gap-2.5">
-            <Phone className="size-4 shrink-0 text-primary" />
+            <WhatsAppIcon className="text-primary" />
             <a
               href={whatsappLink(undefined, DEALER.whatsappDe)}
               target="_blank"
@@ -60,7 +61,7 @@ export default function ReklamacijePage() {
             </a>
           </li>
           <li className="flex items-center gap-2.5">
-            <Phone className="size-4 shrink-0 text-primary" />
+            <WhatsAppIcon className="text-primary" />
             <a
               href={whatsappLink(undefined, DEALER.whatsappHr)}
               target="_blank"

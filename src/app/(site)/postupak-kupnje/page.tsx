@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  MessageSquare,
-  FileText,
-  KeyRound,
-  Check,
-  Phone,
-} from "lucide-react";
+import { MessageSquare, FileText, KeyRound, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DEALER, FINANCING, whatsappLink } from "@/lib/constants";
+import { WhatsAppIcon } from "@/components/site/icons";
 
 export const metadata: Metadata = {
   title: "Postupak kupnje",
@@ -128,7 +123,7 @@ export default function PostupakKupnjePage() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Phone className="size-4" />
+            <WhatsAppIcon className="size-4" />
             WhatsApp {DEALER.whatsappDePretty}
           </a>
         </Button>

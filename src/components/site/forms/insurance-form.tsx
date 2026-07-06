@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -11,6 +10,7 @@ import { composeWaMessage } from "@/lib/leads/compose";
 import { INSURANCE_ADVISOR } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Field, FormShell, PrivacyNote } from "./form-shell";
+import { WhatsAppIcon } from "@/components/site/icons";
 
 const INPUT = "bg-background border-border-strong";
 
@@ -160,7 +160,7 @@ export function InsuranceForm() {
             className="h-auto w-full whitespace-normal py-3.5"
             disabled={pending}
           >
-            <Phone />
+            <WhatsAppIcon className="size-4" />
             {t.insSendDe}
           </Button>
           <Button
@@ -172,7 +172,7 @@ export function InsuranceForm() {
             className="h-auto w-full whitespace-normal py-3.5"
             disabled={pending}
           >
-            <Phone />
+            <WhatsAppIcon className="size-4" />
             {t.insSendAt}
           </Button>
         </div>

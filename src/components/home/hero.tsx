@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Phone } from "lucide-react";
 import { DEALER, whatsappLink } from "@/lib/constants";
 import type { Dict } from "@/lib/i18n/dictionary";
+import { WhatsAppIcon } from "@/components/site/icons";
 
 /** Homepage hero: split text/photo layout per the AUTOCAR EU prototype. */
 export function Hero({ t }: { t: Dict }) {
@@ -40,7 +40,7 @@ export function Hero({ t }: { t: Dict }) {
             className="flex items-center gap-2.5 text-[15px] font-semibold text-foreground hover:text-primary"
           >
             <span className="grid size-[38px] place-items-center rounded-full border border-border-strong text-whatsapp">
-              <Phone className="size-4" />
+              <WhatsAppIcon className="size-4" />
             </span>
             {DEALER.whatsappHrPretty}
           </a>

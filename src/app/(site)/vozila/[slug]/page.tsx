@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, Phone } from "lucide-react";
+import { Check } from "lucide-react";
 import { getCarBySlug, getSimilarCars, primaryImage } from "@/lib/cars";
 import type { CarWithRelations } from "@/lib/cars";
 import { CarCard } from "@/components/car/car-card";
@@ -18,6 +18,7 @@ import {
   type Dict,
 } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/config";
+import { WhatsAppIcon } from "@/components/site/icons";
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
@@ -217,7 +218,7 @@ export default async function CarDetailPage(props: {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Phone className="size-4" />
+                <WhatsAppIcon className="size-4" />
                 WhatsApp DE {DEALER.whatsappDePretty}
               </a>
             </Button>
@@ -227,7 +228,7 @@ export default async function CarDetailPage(props: {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Phone className="size-4" />
+                <WhatsAppIcon className="size-4" />
                 WhatsApp HR {DEALER.whatsappHrPretty}
               </a>
             </Button>
