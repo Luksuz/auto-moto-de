@@ -12,6 +12,9 @@
 (async () => {
   const CUTOFF = new Date("2026-06-01T00:00:00");
   const MAX_IDLE_ROUNDS = 8;
+  // Feeds sorted by "recent activity" interleave bumped old posts, so one
+  // old post is NOT the end of the feed — only stop after several.
+  const STOP_AFTER_OLD_POSTS = 5;
 
   const MONTHS = {
     "siječnja": 0, "veljače": 1, "ožujka": 2, "travnja": 3, "svibnja": 4,
@@ -75,6 +78,9 @@
       if (!existing) {
         posts.set(url, { url, dateLabel, date: date ? date.toISOString() : null, text, images: [...new Set(images)] });
         added++;
+        console.log(
+          `  + [${date ? date.toLocaleDateString("hr-HR") : `?? "${dateLabel}"`}] ${text.replace(/\s+/g, " ").slice(0, 60)}`,
+        );
       } else {
         // keep the longest text (post may have been expanded since) + union images
         if (text.length > existing.text.length) existing.text = text;
@@ -96,14 +102,17 @@
     await sleep(400); // let "Prikaži više" expansions render
     harvest(posts);
 
-    reachedCutoff = [...posts.values()].some(
+    const oldCount = [...posts.values()].filter(
       (p) => p.date && new Date(p.date) < CUTOFF,
-    );
+    ).length;
+    reachedCutoff = oldCount >= STOP_AFTER_OLD_POSTS;
     idle = added === 0 ? idle + 1 : 0;
 
     window.scrollTo(0, document.body.scrollHeight);
     await sleep(2200);
-    console.log(`posts: ${posts.size}${reachedCutoff ? " (cutoff reached)" : ""}`);
+    console.log(
+      `posts: ${posts.size} (${oldCount} older than cutoff)${reachedCutoff ? " — stopping" : ""}`,
+    );
   }
 
   const result = [...posts.values()]
