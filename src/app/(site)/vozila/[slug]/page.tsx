@@ -6,6 +6,7 @@ import { getCarBySlug, getSimilarCars, primaryImage } from "@/lib/cars";
 import type { CarWithRelations } from "@/lib/cars";
 import { CarCard } from "@/components/car/car-card";
 import { CarGallery } from "@/components/car/car-gallery";
+import { CarDescription } from "@/components/car/car-description";
 import { VehicleJsonLd } from "@/components/site/structured-data";
 import { Button } from "@/components/ui/button";
 import { formatPrice, formatKm, estimateMonthlyRate } from "@/lib/utils";
@@ -152,9 +153,7 @@ export default async function CarDetailPage(props: {
           {car.description?.trim() && (
             <section className={PANEL_CLASS}>
               <h2 className={PANEL_HEADING_CLASS}>{t.descTitle}</h2>
-              <div className="whitespace-pre-line text-[14.5px] leading-relaxed text-muted">
-                {car.description}
-              </div>
+              <CarDescription text={car.description} />
             </section>
           )}
 

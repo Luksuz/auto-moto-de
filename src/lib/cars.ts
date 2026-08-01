@@ -14,16 +14,28 @@ const imageOrder: Prisma.CarImageOrderByWithRelationInput[] = [
   { sortOrder: "asc" },
 ];
 
-/** Pick the primary image (or first) of a car. */
+/** Pick the primary image (or first) of a car.
+ *
+ *  Returns the 800px variant: this feeds card grids, never a full-bleed hero.
+ *  Vercel's optimizer is off (see next.config.ts), so whatever URL is returned
+ *  here is what the browser downloads — serving the 1600px original into a
+ *  ~400px card would cost ~290 KB per card. Falls back to `url` for
+ *  hand-uploaded images, which have no variants. */
 export function primaryImage(car: {
-  images: { url: string; isPrimary: boolean; sortOrder: number }[];
+  images: {
+    url: string;
+    mediumUrl?: string | null;
+    isPrimary: boolean;
+    sortOrder: number;
+  }[];
 }): string | null {
   if (!car.images?.length) return null;
   const sorted = [...car.images].sort(
     (a, b) =>
       Number(b.isPrimary) - Number(a.isPrimary) || a.sortOrder - b.sortOrder,
   );
-  return sorted[0]?.url ?? null;
+  const first = sorted[0];
+  return first ? (first.mediumUrl ?? first.url) : null;
 }
 
 export interface CarFilters {

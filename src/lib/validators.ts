@@ -14,7 +14,6 @@ const bodyTypes = [
 
 const fuelTypes = ["DIESEL", "BENZIN", "HYBRID", "ELEKTRICNI", "PLIN"] as const;
 const transmissions = ["AUTOMATSKI", "MANUALNI"] as const;
-const priceRatings = ["SEHR_GUTER", "GUTER", "FAIRER"] as const;
 
 /** Image payload sent from the client image manager. */
 export const carImageSchema = z.object({
@@ -24,6 +23,12 @@ export const carImageSchema = z.object({
   alt: z.string().nullish(),
   sortOrder: z.number().int(),
   isPrimary: z.boolean(),
+  // Pre-rendered sizes produced by /api/admin/upload. Optional so payloads saved
+  // before variants existed still validate; components fall back to `url`.
+  thumbUrl: z.string().nullish(),
+  thumbKey: z.string().nullish(),
+  mediumUrl: z.string().nullish(),
+  mediumKey: z.string().nullish(),
 });
 
 export type CarImageInput = z.infer<typeof carImageSchema>;
@@ -48,7 +53,6 @@ export const carSchema = z.object({
     .number({ message: "Cijena je obavezna" })
     .int()
     .positive("Cijena mora biti veća od 0"),
-  priceRating: z.preprocess(emptyToNull, z.enum(priceRatings).nullish()),
   assignedAgentId: z.preprocess(emptyToNull, z.string().nullish()),
 
   // Tehnički detalji

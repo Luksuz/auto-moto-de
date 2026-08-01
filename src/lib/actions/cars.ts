@@ -31,6 +31,14 @@ async function uniqueSlug(base: string, ignoreId?: string): Promise<string> {
   }
 }
 
+/** Every MinIO object belonging to these rows — the full size plus the 400/800
+ *  variants. Deleting only `key` would orphan the variants in storage forever. */
+function objectKeys(
+  images: { key: string; thumbKey?: string | null; mediumKey?: string | null }[],
+) {
+  return images.flatMap((i) => [i.key, i.thumbKey, i.mediumKey].filter((k): k is string => !!k));
+}
+
 function normalizeImages(images: CarImageInput[]) {
   // Ensure exactly one primary; default to first if none flagged.
   const sorted = [...images].sort((a, b) => a.sortOrder - b.sortOrder);
@@ -54,7 +62,6 @@ function toCarData(data: ReturnType<typeof carSchema.parse>) {
     published: data.published,
     featured: data.featured,
     priceEur: data.priceEur,
-    priceRating: data.priceRating ?? null,
     assignedAgentId: data.assignedAgentId ?? null,
     bodyType: data.bodyType,
     firstRegistration: data.firstRegistration,
@@ -113,6 +120,10 @@ export async function createCar(input: CarInput): Promise<CarActionState> {
           alt: img.alt ?? null,
           sortOrder: img.sortOrder,
           isPrimary: img.isPrimary,
+          thumbUrl: img.thumbUrl ?? null,
+          thumbKey: img.thumbKey ?? null,
+          mediumUrl: img.mediumUrl ?? null,
+          mediumKey: img.mediumKey ?? null,
         })),
       },
     },
@@ -180,6 +191,10 @@ export async function updateCar(
             alt: img.alt ?? null,
             sortOrder: img.sortOrder,
             isPrimary: img.isPrimary,
+            thumbUrl: img.thumbUrl ?? null,
+            thumbKey: img.thumbKey ?? null,
+            mediumUrl: img.mediumUrl ?? null,
+            mediumKey: img.mediumKey ?? null,
           },
         });
       }
@@ -187,7 +202,7 @@ export async function updateCar(
   });
 
   // Remove orphaned objects from storage (best-effort, outside transaction).
-  await Promise.allSettled(removed.map((i) => deleteObject(i.key)));
+  await Promise.allSettled(objectKeys(removed).map((k) => deleteObject(k)));
 
   revalidatePath("/admin/vozila");
   revalidatePath(`/admin/vozila/${id}`);
@@ -205,7 +220,7 @@ export async function deleteCar(id: string): Promise<CarActionState> {
   if (!car) return { ok: false, error: "Vozilo nije pronađeno" };
 
   await prisma.car.delete({ where: { id } });
-  await Promise.allSettled(car.images.map((i) => deleteObject(i.key)));
+  await Promise.allSettled(objectKeys(car.images).map((k) => deleteObject(k)));
 
   revalidatePath("/admin/vozila");
   revalidatePath("/vozila");

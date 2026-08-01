@@ -7,6 +7,11 @@ import { cn } from "@/lib/utils";
 
 interface GalleryImage {
   url: string;
+  /** 400px variant for the thumbnail strip. Vercel's image optimizer is off
+   *  (see next.config.ts), so the browser downloads exactly what is listed here
+   *  — a 42-photo strip pointing at `url` would pull ~12 MB. Null for
+   *  hand-uploaded images, which fall back to `url`. */
+  thumbUrl?: string | null;
   alt?: string | null;
 }
 
@@ -109,9 +114,10 @@ export function CarGallery({
               )}
             >
               <Image
-                src={img.url}
+                src={img.thumbUrl ?? img.url}
                 alt={img.alt || `${title} — fotografija ${i + 1}`}
                 fill
+                loading="lazy"
                 sizes="(max-width: 1024px) 25vw, 180px"
                 className="object-cover"
               />

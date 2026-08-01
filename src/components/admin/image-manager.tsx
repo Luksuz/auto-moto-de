@@ -13,10 +13,27 @@ export type ManagedImage = {
   alt?: string | null;
   sortOrder: number;
   isPrimary: boolean;
+  // Pre-rendered sizes from /api/admin/upload. Carried through the form so they
+  // reach the DB — Vercel's image optimizer is off, so these are what the public
+  // pages actually load. Absent on images saved before variants existed.
+  thumbUrl?: string | null;
+  thumbKey?: string | null;
+  mediumUrl?: string | null;
+  mediumKey?: string | null;
+};
+
+type UploadedFile = {
+  url: string;
+  key: string;
+  name: string;
+  thumbUrl?: string;
+  thumbKey?: string;
+  mediumUrl?: string;
+  mediumKey?: string;
 };
 
 type UploadResponse = {
-  files?: { url: string; key: string; name: string }[];
+  files?: UploadedFile[];
   error?: string;
 };
 
@@ -65,6 +82,10 @@ export function ImageManager({
         alt: null,
         sortOrder: start + i,
         isPrimary: false,
+        thumbUrl: f.thumbUrl ?? null,
+        thumbKey: f.thumbKey ?? null,
+        mediumUrl: f.mediumUrl ?? null,
+        mediumKey: f.mediumKey ?? null,
       }));
       onChange(reindex([...images, ...added]));
     } catch {
@@ -149,7 +170,7 @@ export function ImageManager({
             >
               <div className="relative aspect-[4/3] bg-surface-2">
                 <Image
-                  src={img.url}
+                  src={img.thumbUrl ?? img.url}
                   alt={img.alt ?? ""}
                   fill
                   sizes="200px"
