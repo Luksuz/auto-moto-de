@@ -9,6 +9,7 @@ import {
   Car,
   MessageSquare,
   Users,
+  DownloadCloud,
   Menu,
   X,
   LogOut,
@@ -27,6 +28,7 @@ const BASE_NAV: NavItem[] = [
 ];
 
 const ADMIN_NAV: NavItem[] = [
+  { href: "/admin/izvori", label: "Izvori", icon: DownloadCloud },
   { href: "/admin/korisnici", label: "Korisnici", icon: Users },
 ];
 

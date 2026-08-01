@@ -2,7 +2,6 @@ import type {
   BodyType,
   FuelType,
   Transmission,
-  PriceRating,
   LeadType,
   LeadStatus,
   Role,
@@ -68,13 +67,6 @@ export const FUEL_TYPE_LABEL: Record<FuelType, string> = {
 export const TRANSMISSION_LABEL: Record<Transmission, string> = {
   AUTOMATSKI: "Automatski",
   MANUALNI: "Manualni",
-};
-
-/** German price-rating labels, kept verbatim as on the original site. */
-export const PRICE_RATING_LABEL: Record<PriceRating, string> = {
-  SEHR_GUTER: "Sehr guter Preis",
-  GUTER: "Guter Preis",
-  FAIRER: "Fairer Preis",
 };
 
 export const LEAD_TYPE_LABEL: Record<LeadType, string> = {

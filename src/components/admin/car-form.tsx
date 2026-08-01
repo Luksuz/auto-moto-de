@@ -13,7 +13,6 @@ import {
   BODY_TYPE_LABEL,
   FUEL_TYPE_LABEL,
   TRANSMISSION_LABEL,
-  PRICE_RATING_LABEL,
   toOptions,
 } from "@/lib/constants";
 import { createCar, updateCar } from "@/lib/actions/cars";
@@ -29,7 +28,6 @@ export type CarFormValues = {
   brand: string;
   model: string;
   priceEur: string;
-  priceRating: string;
   featured: boolean;
   assignedAgentId: string;
   bodyType: string;
@@ -58,7 +56,6 @@ const EMPTY: CarFormValues = {
   brand: "",
   model: "",
   priceEur: "",
-  priceRating: "",
   featured: false,
   assignedAgentId: "",
   bodyType: "LIMUZINA",
@@ -256,20 +253,6 @@ export function CarForm({
               onChange={(e) => set("priceEur", e.target.value)}
               placeholder="25990"
             />
-          </Field>
-          <Field label="Ocjena cijene" htmlFor="priceRating" error={errors.priceRating}>
-            <Select className="bg-background border-border-strong"
-              id="priceRating"
-              value={values.priceRating}
-              onChange={(e) => set("priceRating", e.target.value)}
-            >
-              <option value="">— Bez ocjene —</option>
-              {toOptions(PRICE_RATING_LABEL).map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </Select>
           </Field>
           <Field label="Dodijeljeni agent" htmlFor="agent" error={errors.assignedAgentId}>
             <Select className="bg-background border-border-strong"

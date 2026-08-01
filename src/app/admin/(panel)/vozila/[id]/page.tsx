@@ -37,7 +37,6 @@ export default async function UrediVoziloPage({
     brand: car.brand,
     model: car.model,
     priceEur: s(car.priceEur),
-    priceRating: s(car.priceRating),
     featured: car.featured,
     assignedAgentId: s(car.assignedAgentId),
     bodyType: car.bodyType,
