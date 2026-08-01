@@ -29,7 +29,7 @@ const NEW_CARS = [
     doors: "4/5", seats: 5, airConditioning: "Automatska, 3 zone",
     parkingSensors: "Kamera, Prednji, Stražnji", emissionClass: "Euro 6d",
     tuv: "05/2027", origin: "EU porijeklo", previousOwners: 1,
-    priceEur: 26490, priceRating: "GUTER", featured: true,
+    priceEur: 26490, featured: true,
     equipment: ["LED prednja svjetla", "Navigacijski sustav", "ACC tempomat", "Kamera za vožnju unatrag", "Grijana sjedala", "DSG automatski mjenjač", "Digitalni kokpit", "App-Connect (CarPlay/Android Auto)", "Senzori parkiranja naprijed i natrag", "Aluminijske felge 18\"", "Start-stop sustav", "Lane Assist"],
     description: desc(
       "Volkswagen Tiguan 2.0 TDI s DSG mjenjačem u Life opremi — jedan od najtraženijih obiteljskih SUV-ova na tržištu. Prvi vlasnik, potpuna servisna povijest u ovlaštenom VW servisu, bez ulaganja.",
@@ -46,8 +46,7 @@ const NEW_CARS = [
     doors: "4/5", seats: 5, airConditioning: "Automatska, 2 zone",
     parkingSensors: "Stražnji", emissionClass: "Euro 6",
     tuv: "06/2026", origin: "EU porijeklo", previousOwners: 1,
-    priceEur: 13990, priceRating: "SEHR_GUTER",
-    equipment: ["Navigacijski sustav", "Tempomat", "Senzori parkiranja straga", "Grijana sjedala", "Multifunkcijski upravljač", "Bluetooth", "Krovni nosači", "Aluminijske felge 16\"", "Start-stop sustav", "Automatska klima"],
+    priceEur: 13990, equipment: ["Navigacijski sustav", "Tempomat", "Senzori parkiranja straga", "Grijana sjedala", "Multifunkcijski upravljač", "Bluetooth", "Krovni nosači", "Aluminijske felge 16\"", "Start-stop sustav", "Automatska klima"],
     description: desc(
       "Volkswagen Golf VII Variant 1.6 TDI — pouzdan i štedljiv karavan s velikim prtljažnikom. Redovito servisiran, u odličnom stanju za svoju godinu.",
       "Comfortline oprema uključuje navigaciju, tempomat, grijana sjedala, automatsku dvozonsku klimu i stražnje parkirne senzore. Potrošnja na otvorenom ispod 5 l/100 km.",
@@ -63,7 +62,7 @@ const NEW_CARS = [
     doors: "4/5", seats: 5, airConditioning: "Automatska, 3 zone",
     parkingSensors: "Kamera, Prednji, Stražnji", emissionClass: "Euro 6d",
     tuv: "09/2027", origin: "EU porijeklo", previousOwners: 1,
-    priceEur: 31900, priceRating: "GUTER", featured: true,
+    priceEur: 31900, featured: true,
     equipment: ["M Sport paket", "Live Cockpit Professional", "LED adaptivna svjetla", "Kuka za vuču (AHK)", "Grijana sjedala", "Sportska sjedala", "Kamera za vožnju unatrag", "Navigacija Professional", "Automatski mjenjač Steptronic", "Aluminijske felge 18\" M", "Ambijentalna rasvjeta", "Električna vrata prtljažnika"],
     description: desc(
       "BMW 320d Touring u M Sport paketu — savršen spoj sportske dinamike i obiteljske praktičnosti. Prvi vlasnik, servisiran isključivo u BMW servisu.",
@@ -80,8 +79,7 @@ const NEW_CARS = [
     doors: "4/5", seats: 5, airConditioning: "Automatska, 2 zone",
     parkingSensors: "Stražnji", emissionClass: "Euro 6d",
     tuv: "03/2027", origin: "EU porijeklo", previousOwners: 2,
-    priceEur: 22490, priceRating: "FAIRER",
-    equipment: ["Navigacijski sustav", "Senzori parkiranja straga", "Grijana sjedala", "Tempomat", "Automatski mjenjač", "LED svjetla", "Električna vrata prtljažnika", "Aluminijske felge 17\"", "Multifunkcijski upravljač", "Bluetooth"],
+    priceEur: 22490, equipment: ["Navigacijski sustav", "Senzori parkiranja straga", "Grijana sjedala", "Tempomat", "Automatski mjenjač", "LED svjetla", "Električna vrata prtljažnika", "Aluminijske felge 17\"", "Multifunkcijski upravljač", "Bluetooth"],
     description: desc(
       "BMW X1 sDrive18d — kompaktan premium SUV s povišenim položajem sjedenja i prostranom unutrašnjošću. Uredna servisna povijest.",
       "Advantage oprema s navigacijom, automatskim mjenjačem, grijanim sjedalima, LED svjetlima i električnim vratima prtljažnika. Ekonomičan dizelski motor idealan za svakodnevnu vožnju i putovanja.",
@@ -97,7 +95,7 @@ const NEW_CARS = [
     doors: "4/5", seats: 5, airConditioning: "Automatska, 3 zone",
     parkingSensors: "Kamera, Prednji, Stražnji", emissionClass: "Euro 6d",
     tuv: "10/2027", origin: "EU porijeklo", previousOwners: 1,
-    priceEur: 33900, priceRating: "GUTER", featured: true,
+    priceEur: 33900, featured: true,
     equipment: ["S line eksterijer i interijer", "Matrix LED svjetla", "Virtual Cockpit", "S tronic automatski mjenjač", "Kamera za vožnju unatrag", "Grijana sportska sjedala", "MMI Navigacija plus", "Trozonske klima", "Aluminijske felge 18\"", "Ambijentalna rasvjeta", "Električna vrata prtljažnika", "Audi pre sense"],
     description: desc(
       "Audi A4 Avant 40 TDI S tronic u S line opremi — elegantan poslovni karavan s Matrix LED svjetlima i Virtual Cockpitom. Prvi vlasnik, kompletna povijest održavanja.",
@@ -114,8 +112,7 @@ const NEW_CARS = [
     doors: "4/5", seats: 5, airConditioning: "Automatska, 2 zone",
     parkingSensors: "Kamera, Stražnji", emissionClass: "Euro 6d",
     tuv: "04/2028", origin: "EU porijeklo", previousOwners: 1,
-    priceEur: 31490, priceRating: "GUTER",
-    equipment: ["S line paket", "LED svjetla", "Virtual Cockpit", "Navigacijski sustav", "Kamera za vožnju unatrag", "S tronic mjenjač", "Grijana sjedala", "Aluminijske felge 19\"", "Električna vrata prtljažnika", "Tempomat", "CarPlay/Android Auto"],
+    priceEur: 31490, equipment: ["S line paket", "LED svjetla", "Virtual Cockpit", "Navigacijski sustav", "Kamera za vožnju unatrag", "S tronic mjenjač", "Grijana sjedala", "Aluminijske felge 19\"", "Električna vrata prtljažnika", "Tempomat", "CarPlay/Android Auto"],
     description: desc(
       "Audi Q3 35 TFSI S line — moderan kompaktni SUV s benzinskim motorom, idealan za grad i autocestu. Kao nov, prvi vlasnik, niska kilometraža.",
       "S line paket s felgama 19\", LED svjetla, Virtual Cockpit, navigacija, kamera i grijana sjedala. Automatski S tronic mjenjač za opuštenu vožnju.",
@@ -131,8 +128,7 @@ const NEW_CARS = [
     doors: "4/5", seats: 5, airConditioning: "Automatska, 2 zone",
     parkingSensors: "Kamera, Prednji, Stražnji", emissionClass: "Euro 6d",
     tuv: "07/2026", origin: "EU porijeklo", previousOwners: 1,
-    priceEur: 27990, priceRating: "GUTER",
-    equipment: ["Avantgarde paket", "LED High Performance svjetla", "Navigacija Comand", "Kamera za vožnju unatrag", "Grijana sjedala", "9G-Tronic automatski mjenjač", "Aluminijske felge 17\"", "Tempomat s ograničivačem", "KEYLESS-GO start", "Ambijentalna rasvjeta"],
+    priceEur: 27990, equipment: ["Avantgarde paket", "LED High Performance svjetla", "Navigacija Comand", "Kamera za vožnju unatrag", "Grijana sjedala", "9G-Tronic automatski mjenjač", "Aluminijske felge 17\"", "Tempomat s ograničivačem", "KEYLESS-GO start", "Ambijentalna rasvjeta"],
     description: desc(
       "Mercedes-Benz C 220 d Avantgarde — bezvremenska poslovna limuzina s 9G-Tronic automatikom. Prvi vlasnik, servisiran u Mercedes servisu.",
       "Avantgarde linija, LED svjetla visokih performansi, Comand navigacija, kamera, grijana sjedala i ambijentalna rasvjeta. Snažan i štedljiv 194 KS dizel.",
@@ -148,8 +144,7 @@ const NEW_CARS = [
     doors: "4/5", seats: 5, airConditioning: "Automatska, 1 zona",
     parkingSensors: "Kamera, Stražnji", emissionClass: "Euro 6d",
     tuv: "09/2027", origin: "EU porijeklo", previousOwners: 1,
-    priceEur: 22990, priceRating: "GUTER",
-    equipment: ["MBUX multimedija s velikim zaslonom", "LED svjetla", "Kamera za vožnju unatrag", "Progressive linija", "7G-DCT automatski mjenjač", "Grijana sjedala", "Aluminijske felge 17\"", "Tempomat", "CarPlay/Android Auto", "Senzori parkiranja"],
+    priceEur: 22990, equipment: ["MBUX multimedija s velikim zaslonom", "LED svjetla", "Kamera za vožnju unatrag", "Progressive linija", "7G-DCT automatski mjenjač", "Grijana sjedala", "Aluminijske felge 17\"", "Tempomat", "CarPlay/Android Auto", "Senzori parkiranja"],
     description: desc(
       "Mercedes-Benz A 180 d Progressive s MBUX sustavom — kompaktna klasa s premium osjećajem. Niska kilometraža, prvi vlasnik.",
       "MBUX multimedija s velikim zaslonima i glasovnim upravljanjem, LED svjetla, kamera, grijana sjedala i automatski mjenjač. Gradski auto s potrošnjom od 4,5 l/100 km.",
@@ -165,8 +160,7 @@ const NEW_CARS = [
     doors: "4/5", seats: 5, airConditioning: "Automatska, 3 zone",
     parkingSensors: "Kamera, Prednji, Stražnji", emissionClass: "Euro 6d",
     tuv: "02/2028", origin: "EU porijeklo", previousOwners: 1,
-    priceEur: 28900, priceRating: "SEHR_GUTER",
-    equipment: ["Matrix LED svjetla", "Canton audio sustav", "Virtual Cockpit", "DSG automatski mjenjač", "Kamera za vožnju unatrag", "Grijana sjedala naprijed i straga", "Navigacija Columbus", "Trozonska klima", "Električna vrata prtljažnika", "ACC tempomat", "Aluminijske felge 18\"", "KESSY keyless"],
+    priceEur: 28900, equipment: ["Matrix LED svjetla", "Canton audio sustav", "Virtual Cockpit", "DSG automatski mjenjač", "Kamera za vožnju unatrag", "Grijana sjedala naprijed i straga", "Navigacija Columbus", "Trozonska klima", "Električna vrata prtljažnika", "ACC tempomat", "Aluminijske felge 18\"", "KESSY keyless"],
     description: desc(
       "Škoda Superb Combi 2.0 TDI DSG Style — kralj prostora među karavanima, s Matrix LED svjetlima i Canton ozvučenjem. Prvi vlasnik.",
       "Style oprema: Matrix LED, Virtual Cockpit, Columbus navigacija, Canton audio, ACC, kamera, grijana sjedala naprijed i straga te električni prtljažnik od preko 660 litara.",
@@ -182,7 +176,7 @@ const NEW_CARS = [
     doors: "4/5", seats: 7, airConditioning: "Automatska, 3 zone",
     parkingSensors: "Kamera, Prednji, Stražnji", emissionClass: "Euro 6d",
     tuv: "06/2027", origin: "EU porijeklo", previousOwners: 1,
-    priceEur: 27490, priceRating: "GUTER", featured: true,
+    priceEur: 27490, featured: true,
     equipment: ["7 sjedala", "DSG automatski mjenjač", "Navigacijski sustav", "ACC tempomat", "Kamera za vožnju unatrag", "LED svjetla", "Grijana sjedala", "Trozonska klima", "Električna vrata prtljažnika", "Aluminijske felge 18\"", "Krovni nosači"],
     description: desc(
       "Škoda Kodiaq 2.0 TDI DSG sa 7 sjedala — pravi obiteljski SUV za veće obitelji. Prvi vlasnik, uredna servisna povijest.",
@@ -199,8 +193,7 @@ const NEW_CARS = [
     doors: "4/5", seats: 5, airConditioning: "Automatska, 2 zone",
     parkingSensors: "Stražnji", emissionClass: "Euro 6d",
     tuv: "08/2026", origin: "EU porijeklo", previousOwners: 1,
-    priceEur: 13490, priceRating: "SEHR_GUTER",
-    equipment: ["LED svjetla", "Navigacijski sustav SYNC 3", "Tempomat", "Grijana sjedala", "Grijani upravljač", "Senzori parkiranja straga", "Aluminijske felge 17\"", "CarPlay/Android Auto", "Automatska klima", "Start-stop sustav"],
+    priceEur: 13490, equipment: ["LED svjetla", "Navigacijski sustav SYNC 3", "Tempomat", "Grijana sjedala", "Grijani upravljač", "Senzori parkiranja straga", "Aluminijske felge 17\"", "CarPlay/Android Auto", "Automatska klima", "Start-stop sustav"],
     description: desc(
       "Ford Focus Turnier 1.5 EcoBlue Titanium — prostran i izuzetno štedljiv karavan. Redovito održavan, spreman za nove kilometre.",
       "Titanium oprema: LED svjetla, SYNC 3 navigacija s CarPlay/Android Auto, grijana sjedala i upravljač, tempomat i dvozonska klima.",
@@ -216,8 +209,7 @@ const NEW_CARS = [
     doors: "4/5", seats: 5, airConditioning: "Automatska, 1 zona",
     parkingSensors: "Kamera, Stražnji", emissionClass: "Euro 6d",
     tuv: "05/2028", origin: "EU porijeklo", previousOwners: 1,
-    priceEur: 13990, priceRating: "GUTER",
-    equipment: ["LED svjetla", "Navigacijski sustav EASY LINK", "Kamera za vožnju unatrag", "Senzori parkiranja", "Tempomat", "Automatska klima", "Aluminijske felge 16\"", "CarPlay/Android Auto", "Multifunkcijski upravljač"],
+    priceEur: 13990, equipment: ["LED svjetla", "Navigacijski sustav EASY LINK", "Kamera za vožnju unatrag", "Senzori parkiranja", "Tempomat", "Automatska klima", "Aluminijske felge 16\"", "CarPlay/Android Auto", "Multifunkcijski upravljač"],
     description: desc(
       "Renault Clio TCe 90 Intens — moderan gradski auto s bogatom opremom i niskom potrošnjom. Prvi vlasnik, niska kilometraža, kao nov.",
       "Intens oprema: full LED svjetla, EASY LINK navigacija s velikim zaslonom, kamera, senzori parkiranja i automatska klima.",

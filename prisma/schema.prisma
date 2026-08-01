@@ -39,10 +39,14 @@ enum Transmission {
   MANUALNI
 }
 
+/// DEPRECATED — not written by any code and not shown anywhere. It only still
+/// exists because the deployed build's Prisma client still SELECTs the column,
+/// so dropping it 500s production until the new build ships. Drop it again once
+/// the app is deployed.
 enum PriceRating {
-  SEHR_GUTER // Sehr guter Preis
-  GUTER // Guter Preis
-  FAIRER // Fairer Preis
+  SEHR_GUTER
+  GUTER
+  FAIRER
 }
 
 enum LeadType {
@@ -63,6 +67,13 @@ enum FeedbackStatus {
   TODO
   IN_PROGRESS
   DONE
+}
+
+enum ScrapeStatus {
+  RUNNING
+  SUCCESS
+  PARTIAL // finished, but some listings failed — see ScrapeRun.message
+  FAILED
 }
 
 model User {
@@ -90,6 +101,7 @@ model Car {
 
   // Pricing
   priceEur    Int
+  /// DEPRECATED — see the PriceRating enum. Always null.
   priceRating PriceRating?
 
   // Tehnički detalji
@@ -118,6 +130,17 @@ model Car {
   // Oprema (equipment list)
   equipment String[]
 
+  // Provenance — set by the scraper/importer pipelines, null for hand-entered
+  // cars. sourceId is the idempotency key for re-runs (e.g. "mobilede:412887654").
+  sourceId  String? @unique
+  sourceUrl String?
+
+  // Which dealer feed produced this car. Needed so a re-scrape can tell "this
+  // dealer no longer lists this car" (delete it) from "another dealer's car"
+  // (leave alone). Null for hand-entered cars, which the worker never touches.
+  dealerSource   DealerSource? @relation(fields: [dealerSourceId], references: [id], onDelete: SetNull)
+  dealerSourceId String?
+
   // Relations
   images        CarImage[]
   leads         Lead[]
@@ -131,18 +154,91 @@ model Car {
   @@index([published])
   @@index([featured])
   @@index([priceEur])
+  @@index([dealerSourceId])
+}
+
+/// A dealer inventory page that gets re-scraped on a schedule.
+/// Managed from /admin/izvori; processed by scripts/run-due-sources.mjs, which a
+/// Railway cron service runs hourly. "Every 2 weeks" lives here as intervalDays
+/// rather than in a crontab, so each dealer can have its own cadence and a missed
+/// tick self-heals on the next hour instead of waiting another fortnight.
+model DealerSource {
+  id    String @id @default(cuid())
+  label String
+  url   String @unique
+
+  /// mobile.de dealer id, auto-detected from the page on first run. Detail pages
+  /// only render their photo gallery on the /home/vip?customerId=…&id=… URL form,
+  /// so without this the importer would collect other dealers' photos.
+  customerId String?
+
+  enabled      Boolean @default(true)
+  intervalDays Int     @default(14)
+
+  /// The worker's queue: it picks up every enabled source whose nextRunAt has
+  /// passed. "Scrape now" in the admin panel just sets this to now().
+  nextRunAt DateTime @default(now())
+
+  lastRunAt   DateTime?
+  lastStatus  ScrapeStatus?
+  lastMessage String?
+  carCount    Int           @default(0)
+
+  runs ScrapeRun[]
+  cars Car[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enabled, nextRunAt])
+}
+
+/// One execution of one DealerSource — the admin panel's run history.
+model ScrapeRun {
+  id       String       @id @default(cuid())
+  source   DealerSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  sourceId String
+
+  status     ScrapeStatus @default(RUNNING)
+  startedAt  DateTime     @default(now())
+  finishedAt DateTime?
+
+  listingsFound Int @default(0)
+  carsCreated   Int @default(0)
+  carsUpdated   Int @default(0)
+  carsDeleted   Int @default(0)
+  imagesAdded   Int @default(0)
+
+  message String? @db.Text
+
+  @@index([sourceId, startedAt])
 }
 
 model CarImage {
   id        String  @id @default(cuid())
   car       Car     @relation(fields: [carId], references: [id], onDelete: Cascade)
   carId     String
-  url       String
+  url       String // full size, 1600px wide
   key       String // MinIO object key (for deletion)
   alt       String?
   sortOrder Int     @default(0)
   isPrimary Boolean @default(false)
   createdAt DateTime @default(now())
+
+  // Pre-rendered smaller variants, written at import time by sharp.
+  //
+  // Vercel's image optimizer is switched off (next.config.ts: images.unoptimized)
+  // because it bills per source image and one dealer import (1000+ photos)
+  // exhausts the plan's allowance — the whole site then 402s with
+  // OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED, including local assets. The
+  // importer already runs sharp, so it emits the sizes instead and each surface
+  // picks the one it needs: gallery strip -> thumb, cards -> medium, hero -> url.
+  //
+  // Null for hand-uploaded images (/api/admin/upload), which fall back to `url`.
+  thumbUrl   String? // 400px wide
+  thumbKey   String?
+  mediumUrl  String? // 800px wide
+  mediumKey  String?
 
   @@index([carId])
 }
