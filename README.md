@@ -100,10 +100,6 @@ Optional: `MINIO_BUCKET`, `MINIO_REGION`, `OPENROUTER_EXTRACT_MODEL`,
 `FIRECRAWL_RPM`, `CONCURRENCY`, `TICK_MINUTES`, `RUN_ON_START`,
 `STALE_RUN_MINUTES`, `SHUTDOWN_GRACE_S`, `PORT`.
 
-`railway-function/index.ts` is a single-file Bun port of the same worker for
-Railway Functions. It duplicates the prompts and schemas, so prefer the service
-above; never run both, as they would fight over the same `nextRunAt` queue.
-
 ### Manual / one-off runs
 
 ```bash
