@@ -5,6 +5,19 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
+/** Load .env when running from a checkout, and do nothing when there isn't one.
+ *
+ *  process.loadEnvFile() THROWS ENOENT on a missing file, so calling it
+ *  unguarded crashes on any host that injects the environment itself — Railway,
+ *  Docker, CI — before a single line of the job runs. */
+export function loadEnv(path = ".env") {
+  try {
+    process.loadEnvFile(path);
+  } catch (err) {
+    if (err?.code !== "ENOENT") throw err;
+  }
+}
+
 export function requireEnv(names) {
   const missing = names.filter((n) => !process.env[n]);
   if (missing.length > 0) {

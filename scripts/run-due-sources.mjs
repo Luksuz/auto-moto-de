@@ -13,9 +13,9 @@
 //   node scripts/run-due-sources.mjs --source <id|url>
 //   node scripts/run-due-sources.mjs --dry-run        # scrape, write nothing
 import { createSyncer } from "./lib/sync.mjs";
-import { createClients, requireEnv, syncConfig, SYNC_ENV } from "./lib/clients.mjs";
+import { createClients, loadEnv, requireEnv, syncConfig, SYNC_ENV } from "./lib/clients.mjs";
 
-process.loadEnvFile(".env");
+loadEnv();
 
 const args = process.argv.slice(2);
 const flag = (name, fallback = null) => {

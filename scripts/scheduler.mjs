@@ -31,9 +31,9 @@
 //   PORT                if set, serves GET /health with the scheduler's status
 import { createServer } from "node:http";
 import { createSyncer } from "./lib/sync.mjs";
-import { createClients, requireEnv, syncConfig, SYNC_ENV } from "./lib/clients.mjs";
+import { createClients, loadEnv, requireEnv, syncConfig, SYNC_ENV } from "./lib/clients.mjs";
 
-process.loadEnvFile(".env");
+loadEnv();
 requireEnv(SYNC_ENV);
 
 const TICK_MS = Number(process.env.TICK_MINUTES || 10) * 60_000;
