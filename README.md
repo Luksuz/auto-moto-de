@@ -57,23 +57,52 @@ Three stages, all sharing `scripts/lib/mobilede.mjs` (fetch + extract) and
 
 ### Scheduling
 
-The app runs on Vercel, whose function timeout is far below the ~10 minutes a
-full sync needs. The worker therefore runs as a **small Railway cron service**
-against the same Postgres:
+The sync cannot run on Vercel. Function duration is capped at 300s on Hobby and
+800s on Pro (1800s with the extended-duration beta); a full sync is minutes to
+hours. It runs as an **always-on Railway service** against the same Postgres:
 
 ```
-Cron Schedule: 0 * * * *          # hourly
-Start Command: node scripts/run-due-sources.mjs
+Start Command: node scripts/scheduler.mjs
 ```
 
-It ticks hourly, but the cadence lives per-dealer in
-`DealerSource.intervalDays` (default 14). That way each dealer can have its own
-interval, a missed tick self-heals on the next hour rather than waiting another
-fortnight, and the admin panel's "Pokreni" button is just `nextRunAt = now()` —
-no HTTP call from Vercel to Railway to secure or time out.
+A long-lived process rather than a Railway cron job, deliberately. Cron jobs
+must exit when finished, and Railway *skips* a scheduled execution while the
+previous one is still running — fine for a 15-minute sync, wrong for a
+multi-hour one, which would silently swallow ticks and get killed without a
+graceful shutdown when a deploy lands mid-run.
 
-The service needs `DATABASE_URL`, `MINIO_*`, `FIRECRAWL_API_KEY` and
-`OPENROUTER_API_KEY`.
+`scripts/scheduler.mjs` therefore:
+
+- ticks every `TICK_MINUTES` (default 10) and asks only "is anything due?",
+  which is one indexed query when the answer is no
+- runs one sync at a time; a tick arriving mid-run is skipped and logged, never
+  queued behind it
+- finishes the current run on SIGTERM before exiting (up to
+  `SHUTDOWN_GRACE_S`), so a deploy does not abandon a half-imported dealer
+- closes `ScrapeRun` rows left `RUNNING` by a killed process at boot, which
+  otherwise show as a sync that never ends in the admin panel
+- serves `GET /health` with live status if `PORT` is set
+
+The cadence itself still lives per-dealer in `DealerSource.intervalDays`
+(default 14), so each dealer can differ, a missed tick self-heals on the next
+one, and the admin panel's "Pokreni" button is just `nextRunAt = now()` — no
+HTTP call from Vercel to Railway to secure or time out.
+
+**Throughput is bounded by Firecrawl, not by this service.** The rate gate
+allows `FIRECRAWL_RPM` pages per minute across the whole run, so at the default
+10 a sync covers ~600 pages/hour regardless of `CONCURRENCY`. If a run takes
+hours, raising `FIRECRAWL_RPM` (as far as the plan allows) is the lever that
+matters.
+
+Required: `DATABASE_URL`, `FIRECRAWL_API_KEY`, `OPENROUTER_API_KEY`,
+`MINIO_ENDPOINT`, `MINIO_ACCESS_KEY_ID`, `MINIO_SECRET_ACCESS_KEY`.
+Optional: `MINIO_BUCKET`, `MINIO_REGION`, `OPENROUTER_EXTRACT_MODEL`,
+`FIRECRAWL_RPM`, `CONCURRENCY`, `TICK_MINUTES`, `RUN_ON_START`,
+`STALE_RUN_MINUTES`, `SHUTDOWN_GRACE_S`, `PORT`.
+
+`railway-function/index.ts` is a single-file Bun port of the same worker for
+Railway Functions. It duplicates the prompts and schemas, so prefer the service
+above; never run both, as they would fight over the same `nextRunAt` queue.
 
 ### Manual / one-off runs
 
