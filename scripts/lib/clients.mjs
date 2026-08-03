@@ -69,6 +69,10 @@ export function syncConfig(overrides = {}) {
     // with a 429. This is the ceiling on the whole pipeline: at 10 req/min a run
     // can cover ~600 pages/hour no matter how much concurrency is configured.
     rpm: Number(process.env.FIRECRAWL_RPM || 10),
+    // How many scrapes Firecrawl allows in flight at once — a separate limit
+    // from the per-minute one, and 2 on the starter plans. Exceeding it returns
+    // 429s no matter how slowly requests are started.
+    firecrawlConcurrency: Number(process.env.FIRECRAWL_CONCURRENCY || 2),
     concurrency: Number(process.env.CONCURRENCY || 4),
     firecrawlKey: process.env.FIRECRAWL_API_KEY,
     openrouterKey: process.env.OPENROUTER_API_KEY,

@@ -33,6 +33,7 @@ export function createSyncer({
   model,
   rpm = 10,
   concurrency = 4,
+  firecrawlConcurrency = 2,
   dryRun = false,
   log = console.log,
   firecrawlKey,
@@ -40,7 +41,7 @@ export function createSyncer({
 }) {
   const DRY = dryRun;
   const CONCURRENCY = concurrency;
-  const fetchHtml = createFirecrawl({ apiKey: firecrawlKey, rpm, log });
+  const fetchHtml = createFirecrawl({ apiKey: firecrawlKey, rpm, concurrency: firecrawlConcurrency, log });
   const extract = createModel({ apiKey: openrouterKey, model, log });
   const importer = createImporter({ prisma, s3, bucket, endpoint, log });
 

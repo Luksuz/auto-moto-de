@@ -53,7 +53,12 @@ for (const [name, val] of [
 }
 
 const log = (m) => console.warn(m);
-const fetchHtml = createFirecrawl({ apiKey: process.env.FIRECRAWL_API_KEY, rpm: RPM, log });
+const fetchHtml = createFirecrawl({
+  apiKey: process.env.FIRECRAWL_API_KEY,
+  rpm: RPM,
+  concurrency: Number(process.env.FIRECRAWL_CONCURRENCY || 2),
+  log,
+});
 const extract = createModel({ apiKey: process.env.OPENROUTER_API_KEY, model: MODEL, log });
 
 const cachePath = (id) => join(CACHE_DIR, `${id}.html`);

@@ -98,11 +98,19 @@ The cadence itself still lives per-dealer in `DealerSource.intervalDays`
 one, and the admin panel's "Pokreni" button is just `nextRunAt = now()` — no
 HTTP call from Vercel to Railway to secure or time out.
 
-**Throughput is bounded by Firecrawl, not by this service.** The rate gate
-allows `FIRECRAWL_RPM` pages per minute across the whole run, so at the default
-10 a sync covers ~600 pages/hour regardless of `CONCURRENCY`. If a run takes
-hours, raising `FIRECRAWL_RPM` (as far as the plan allows) is the lever that
-matters.
+**Throughput is bounded by Firecrawl, not by this service**, and Firecrawl
+enforces *two* limits that must both be respected:
+
+- `FIRECRAWL_RPM` (default 10) — how many scrapes may **start** per minute. At
+  10 a sync covers ~600 pages/hour regardless of `CONCURRENCY`.
+- `FIRECRAWL_CONCURRENCY` (default 2) — how many may be **in flight at once**,
+  which is 2 on the starter plans. A detail page takes 8–20s, so spacing starts
+  alone is not enough: without this cap three or four requests end up live
+  together and the plan answers 429. Set it to whatever your plan allows.
+
+If a run takes hours, raising these two (as far as the plan allows) is the lever
+that matters — not `CONCURRENCY`, which only governs how many listings are
+processed in parallel locally.
 
 Required: `DATABASE_URL`, `FIRECRAWL_API_KEY`, `OPENROUTER_API_KEY`,
 `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY_ID`, `MINIO_SECRET_ACCESS_KEY`.

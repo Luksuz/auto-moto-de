@@ -46,9 +46,27 @@ export class RateLimited extends Error {}
  *  requests/min and answer everything beyond that with a 429. Requests go through
  *  one global gate rather than firing concurrently — bursting just converts
  *  credits into 429s. */
-export function createFirecrawl({ apiKey, rpm = 10, log = () => {} }) {
+export function createFirecrawl({ apiKey, rpm = 10, concurrency = 2, log = () => {} }) {
   const minInterval = Math.ceil(60000 / Math.max(1, rpm));
   let nextSlot = 0;
+
+  // Firecrawl enforces TWO separate limits: requests per minute, and how many
+  // scrapes may be in flight at once (2 on the starter plans). The interval gate
+  // below only controls when a request STARTS — a detail page takes 8-20s, so
+  // with four workers three or four requests were live simultaneously and the
+  // concurrency limit answered with 429s. This semaphore caps the in-flight
+  // count; the two limits together are what the plan actually allows.
+  let inFlight = 0;
+  const waiting = [];
+  const acquire = () =>
+    inFlight < concurrency
+      ? ((inFlight += 1), Promise.resolve())
+      : new Promise((resolve) => waiting.push(resolve));
+  const release = () => {
+    const next = waiting.shift();
+    if (next) next();
+    else inFlight -= 1;
+  };
 
   async function gate() {
     const now = Date.now();
@@ -59,6 +77,15 @@ export function createFirecrawl({ apiKey, rpm = 10, log = () => {} }) {
 
   async function once(url) {
     await gate();
+    await acquire();
+    try {
+      return await request(url);
+    } finally {
+      release();
+    }
+  }
+
+  async function request(url) {
     const res = await fetch("https://api.firecrawl.dev/v2/scrape", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
