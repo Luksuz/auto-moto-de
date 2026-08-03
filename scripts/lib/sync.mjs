@@ -204,6 +204,24 @@ export function createSyncer({
     }
   }
 
+  /** A process killed mid-run (deploy, OOM, restart, a cron execution that
+   *  overran) leaves its ScrapeRun row at RUNNING forever, which the admin panel
+   *  renders as a sync that never ends. Nothing else will ever close those rows,
+   *  so every entry point does it before starting work. */
+  async function closeAbandonedRuns(staleMinutes = 240) {
+    const cutoff = new Date(Date.now() - staleMinutes * 60_000);
+    const { count } = await prisma.scrapeRun.updateMany({
+      where: { status: "RUNNING", startedAt: { lt: cutoff } },
+      data: {
+        status: "FAILED",
+        finishedAt: new Date(),
+        message: "Prekinuto — proces je zaustavljen tijekom obrade.",
+      },
+    });
+    if (count > 0) log(`closed ${count} abandoned run(s) left RUNNING by a previous process`);
+    return count;
+  }
+
   /** Every enabled source whose nextRunAt has passed. The cadence lives per
    *  dealer in intervalDays, so the caller can tick often and a missed tick
    *  self-heals on the next one instead of waiting another fortnight. */
@@ -234,5 +252,5 @@ export function createSyncer({
     return summary;
   }
 
-  return { runDue, runSource };
+  return { runDue, runSource, closeAbandonedRuns };
 }

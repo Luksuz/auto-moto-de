@@ -58,22 +58,6 @@ const state = {
   stopping: false,
 };
 
-/** A process killed mid-run (deploy, OOM, restart) leaves its ScrapeRun row at
- *  RUNNING forever, which the admin panel renders as a sync that never ends.
- *  Nothing else will ever close those rows, so do it at boot. */
-async function closeAbandonedRuns() {
-  const cutoff = new Date(Date.now() - STALE_RUN_MINUTES * 60_000);
-  const { count } = await prisma.scrapeRun.updateMany({
-    where: { status: "RUNNING", startedAt: { lt: cutoff } },
-    data: {
-      status: "FAILED",
-      finishedAt: new Date(),
-      message: "Prekinuto — proces je zaustavljen tijekom obrade.",
-    },
-  });
-  if (count > 0) log(`closed ${count} abandoned run(s) left RUNNING by a previous process`);
-}
-
 async function tick(reason) {
   state.ticks++;
   if (state.stopping) return;
@@ -167,6 +151,6 @@ log(
     `firecrawl ${syncConfig().rpm} req/min, concurrency ${syncConfig().concurrency}`,
 );
 
-await closeAbandonedRuns();
+await syncer.closeAbandonedRuns(STALE_RUN_MINUTES);
 const timer = setInterval(() => tick("interval"), TICK_MS);
 if (RUN_ON_START) await tick("startup");

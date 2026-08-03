@@ -38,6 +38,10 @@ const syncer = createSyncer({
   }),
 });
 
+// Close out rows abandoned by a previous execution before starting, so a cron
+// run that was killed does not leave the admin panel showing a sync in progress.
+await syncer.closeAbandonedRuns(Number(process.env.STALE_RUN_MINUTES || 240));
+
 const summary = await syncer.runDue({ all: has("all"), only: flag("source") });
 
 await prisma.$disconnect();
