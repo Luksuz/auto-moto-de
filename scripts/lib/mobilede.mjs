@@ -24,6 +24,14 @@
 //   4. The LLM extracts, a regex audits. Ad ids the model returns are verified to
 //      occur literally in the HTML; ids it missed are added back. Models
 //      occasionally invent plausible 9-digit ids.
+//   6. The MODEL reads markdown, the REGEXES read rawHtml. Firecrawl returns
+//      both for one credit. A detail page is ~27k tokens as cleaned HTML but
+//      ~6k as markdown, and a dealer page 30k vs 4k — 77-87% less context for
+//      identical extracted values. Markdown is also *more* accurate: with the
+//      HTML, gpt-5-nano invented equipment entries (230 vs the correct 202);
+//      with markdown it returns exactly 202. But markdown drops the gallery's
+//      thumbnail markup and the customerId, so images, ad ids, the page
+//      indicator and the car counter must still come from rawHtml.
 //   5. mobile.de splits the headline into "title" ("Audi Q5") and "subTitle"
 //      ("40 TDI quattro sport/…"), and the <h1> holds the DEALER's name. Asking
 //      for "the title" yields just the model, collapsing six BMWs onto one name.
@@ -56,7 +64,7 @@ export function createFirecrawl({ apiKey, rpm = 10, log = () => {} }) {
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         url,
-        formats: ["rawHtml"],
+        formats: ["markdown", "rawHtml"],
         onlyMainContent: false, // rule 2
         maxAge: 0,
         timeout: 90000,
@@ -77,7 +85,9 @@ export function createFirecrawl({ apiKey, rpm = 10, log = () => {} }) {
     if (!res.ok || !json.success) {
       throw new Error(`firecrawl ${res.status}: ${JSON.stringify(json).slice(0, 160)}`);
     }
-    return json.data?.rawHtml ?? "";
+    // Both formats come back for the same single credit. Markdown is what the
+    // model reads; rawHtml is what the regexes read. See PAGE_FORMATS below.
+    return { rawHtml: json.data?.rawHtml ?? "", markdown: json.data?.markdown ?? "" };
   }
 
   /** A 429 means "too fast", not "broken", so it does not consume the attempt
@@ -609,7 +619,8 @@ export async function discoverListings({
 
   for (let page = 1; page <= maxPages; page++) {
     const url = page === 1 ? dealerUrl : withPageNumber(dealerUrl, page);
-    const html = await fetchHtml(url);
+    const doc = await fetchHtml(url);
+    const html = doc.rawHtml;
     pagesRead++;
 
     const indicator = pageIndicator(html);
@@ -627,7 +638,10 @@ export async function discoverListings({
     const before = truth.size;
     for (const id of idsHere) truth.add(id);
 
-    for (const part of chunk(clean(html), chunkChars)) {
+    // Markdown keeps every adId and title but drops ~87% of the tokens.
+    // Fall back to the cleaned HTML if Firecrawl returned no markdown.
+    const forModel = doc.markdown?.length > 500 ? doc.markdown : clean(html);
+    for (const part of chunk(forModel, chunkChars)) {
       const { data, usage: u } = await extract(part, {
         schema: LISTINGS_SCHEMA,
         prompt: LISTINGS_PROMPT,
@@ -662,17 +676,23 @@ export async function discoverListings({
  *  correct and what the seller actually wrote. The detail page stays the
  *  fallback for listings discovery only recovered by ad id. */
 export async function extractDetail({
-  html,
+  page,
   url,
   adId,
   extract,
   preferredTitle = null,
   log = () => {},
 }) {
+  const html = typeof page === "string" ? page : page.rawHtml;
+  const markdown = typeof page === "string" ? "" : page.markdown;
   if (html.length < 5000) throw new Error(`empty page (${html.length} bytes)`);
 
+  // The model reads markdown (~6k tokens); the image scrape below needs the
+  // gallery markup, which only rawHtml has.
+  const forModel = markdown?.length > 500 ? markdown : clean(html);
+
   const warnings = [];
-  const { data: car, usage } = await extract(clean(html), {
+  const { data: car, usage } = await extract(forModel, {
     schema: CAR_SCHEMA,
     prompt: CAR_PROMPT,
     name: "vehicle",

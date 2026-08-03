@@ -37,6 +37,16 @@ Three stages, all sharing `scripts/lib/mobilede.mjs` (fetch + extract) and
    under a strict JSON schema. Enum values are re-validated in code before they
    reach Postgres.
 
+   **The model reads markdown, the regexes read HTML.** Firecrawl returns both
+   formats for the same single credit. A detail page is ~27k tokens as cleaned
+   HTML but ~6k as markdown, and a dealer page 30k vs 4k — 77–87% less context
+   for identical extracted values (40% of the HTML was `class="..."` attributes
+   alone). Markdown is also *more* accurate: given the HTML, `gpt-5-nano`
+   invented equipment entries (230 against the correct 202); given markdown it
+   returns exactly 202. Images, ad ids, the `customerId`, the page indicator and
+   the car counter still come from `rawHtml`, which is the only format carrying
+   the gallery markup.
+
    The seller's description comes back **already structured** as
    `description_blocks` (heading / prose / one entry per feature) rather than as
    one string. Dealers separate features every possible way — `a, b, c`,

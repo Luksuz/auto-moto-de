@@ -58,15 +58,23 @@ const extract = createModel({ apiKey: process.env.OPENROUTER_API_KEY, model: MOD
 
 const cachePath = (id) => join(CACHE_DIR, `${id}.html`);
 
-async function htmlFor(listing) {
-  const path = cachePath(listing.adId);
-  if (!REFETCH && existsSync(path)) {
-    const cached = readFileSync(path, "utf8");
-    if (cached.length > 5000) return { html: cached, cached: true };
+/** Caches both formats: the model reads the markdown, the image scrape reads
+ *  the HTML. A cache entry without markdown (written before the switch) still
+ *  works — extractDetail falls back to the cleaned HTML. */
+async function pageFor(listing) {
+  const htmlPath = cachePath(listing.adId);
+  const mdPath = htmlPath.replace(/\.html$/, ".md");
+  if (!REFETCH && existsSync(htmlPath)) {
+    const rawHtml = readFileSync(htmlPath, "utf8");
+    const markdown = existsSync(mdPath) ? readFileSync(mdPath, "utf8") : "";
+    if (rawHtml.length > 5000) return { page: { rawHtml, markdown }, cached: true };
   }
-  const html = await fetchHtml(listing.url);
-  if (html.length > 5000) writeFileSync(path, html);
-  return { html, cached: false };
+  const page = await fetchHtml(listing.url);
+  if (page.rawHtml.length > 5000) {
+    writeFileSync(htmlPath, page.rawHtml);
+    if (page.markdown) writeFileSync(mdPath, page.markdown);
+  }
+  return { page, cached: false };
 }
 
 // --- main --------------------------------------------------------------------
@@ -127,12 +135,12 @@ let progress = 0;
 await pool(todo, CONCURRENCY, async (listing) => {
   const tag = `[${++progress}/${todo.length}] ${listing.adId}`;
   try {
-    const { html, cached } = await htmlFor(listing);
+    const { page, cached } = await pageFor(listing);
     if (cached) fromCache++;
     else fetched++;
 
     const { listing: record, usage } = await extractDetail({
-      html,
+      page,
       url: listing.url,
       adId: listing.adId,
       extract,

@@ -92,9 +92,9 @@ export function createSyncer({
       await pool(found.listings, CONCURRENCY, async (listing) => {
         const tag = `[${++done}/${found.listings.length}] ${listing.adId}`;
         try {
-          const html = await fetchHtml(listing.url);
+          const page = await fetchHtml(listing.url);
           const { listing: record } = await extractDetail({
-            html,
+            page,
             url: listing.url,
             adId: listing.adId,
             extract,
