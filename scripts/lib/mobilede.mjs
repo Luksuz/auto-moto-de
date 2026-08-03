@@ -106,21 +106,37 @@ export function createFirecrawl({ apiKey, rpm = 10, log = () => {} }) {
 // --- OpenRouter --------------------------------------------------------------
 
 export function createModel({ apiKey, model, log = () => {} }) {
+  const TRIES = 5;
+
   return async function extract(html, { schema, prompt, name, label = "" }) {
     for (let attempt = 1; ; attempt++) {
-      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model,
-          temperature: 0,
-          messages: [
-            { role: "system", content: prompt },
-            { role: "user", content: html },
-          ],
-          response_format: { type: "json_schema", json_schema: { name, strict: true, schema } },
-        }),
-      });
+      let res;
+      try {
+        res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model,
+            temperature: 0,
+            messages: [
+              { role: "system", content: prompt },
+              { role: "user", content: html },
+            ],
+            response_format: { type: "json_schema", json_schema: { name, strict: true, schema } },
+          }),
+        });
+      } catch (err) {
+        // A dropped connection ("fetch failed", ECONNRESET, ETIMEDOUT) throws
+        // instead of returning a response, so without this it skipped the retry
+        // path entirely and killed the whole source. On a multi-hour run a
+        // momentary blip must not cost the entire dealer.
+        if (attempt >= TRIES) {
+          throw new Error(`${label}: network error after ${TRIES} tries: ${String(err?.message ?? err).slice(0, 90)}`);
+        }
+        log(`  retry ${attempt}/${TRIES} model ${label} (network: ${String(err?.message ?? err).slice(0, 60)})`);
+        await sleep(3000 * attempt);
+        continue;
+      }
       const json = await res.json().catch(() => ({}));
 
       if (res.ok && !json.error) {
@@ -128,13 +144,13 @@ export function createModel({ apiKey, model, log = () => {} }) {
         try {
           return { data: JSON.parse(content), usage: json.usage ?? {} };
         } catch {
-          if (attempt >= 3) throw new Error(`${label}: model returned non-JSON: ${content.slice(0, 140)}`);
+          if (attempt >= TRIES) throw new Error(`${label}: model returned non-JSON: ${content.slice(0, 140)}`);
         }
-      } else if (attempt >= 3 || (res.status < 500 && res.status !== 429)) {
+      } else if (attempt >= TRIES || (res.status < 500 && res.status !== 429)) {
         throw new Error(`${label}: openrouter ${res.status}: ${JSON.stringify(json).slice(0, 180)}`);
       }
 
-      log(`  retry ${attempt}/3 model ${label} (http ${res.status})`);
+      log(`  retry ${attempt}/${TRIES} model ${label} (http ${res.status})`);
       await sleep(3000 * attempt);
     }
   };

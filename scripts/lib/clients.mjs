@@ -52,6 +52,15 @@ export function createClients() {
 }
 
 export function syncConfig(overrides = {}) {
+  // Drop empty overrides before merging. An absent CLI flag arrives here as
+  // null (the flag helper's own default parameter turns an explicit `undefined`
+  // back into `null`), and merging that over a default sends OpenRouter a
+  // request with no model, which it rejects with `400 No models provided`.
+  // Booleans and 0 must survive, so only null/undefined are dropped.
+  const defined = Object.fromEntries(
+    Object.entries(overrides).filter(([, v]) => v !== undefined && v !== null),
+  );
+
   return {
     bucket: process.env.MINIO_BUCKET || "kupiauto",
     endpoint: process.env.MINIO_ENDPOINT,
@@ -63,6 +72,6 @@ export function syncConfig(overrides = {}) {
     concurrency: Number(process.env.CONCURRENCY || 4),
     firecrawlKey: process.env.FIRECRAWL_API_KEY,
     openrouterKey: process.env.OPENROUTER_API_KEY,
-    ...overrides,
+    ...defined,
   };
 }
