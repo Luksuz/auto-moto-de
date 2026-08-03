@@ -47,3 +47,6 @@ next-env.d.ts
 /mobilede*.json
 /mobilede*.html
 /listing-urls.json
+
+# throwaway benchmark/debug harnesses
+scripts/_*.mjs
