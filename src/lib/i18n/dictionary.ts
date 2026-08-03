@@ -208,6 +208,8 @@ const hr = {
   tOrigin: "Porijeklo",
   tOwners: "Prethodni vlasnici",
   noPhotos: "Nema dostupnih fotografija",
+  lastUpdated: "Ponuda ažurirana",
+  carUpdated: "Podaci ažurirani",
   pTypeRequired: "Odaberite vrstu problema.",
   notFoundTitle: "Stranica nije pronađena",
   notFoundText:
@@ -428,6 +430,8 @@ const de: Dict = {
   tOrigin: "Herkunft",
   tOwners: "Vorbesitzer",
   noPhotos: "Keine Fotos verfügbar",
+  lastUpdated: "Angebot aktualisiert",
+  carUpdated: "Daten aktualisiert",
   pTypeRequired: "Bitte wählen Sie die Art des Problems.",
   notFoundTitle: "Seite nicht gefunden",
   notFoundText:

@@ -9,7 +9,7 @@ import { CarGallery } from "@/components/car/car-gallery";
 import { CarDescription } from "@/components/car/car-description";
 import { VehicleJsonLd } from "@/components/site/structured-data";
 import { Button } from "@/components/ui/button";
-import { formatPrice, formatKm, estimateMonthlyRate } from "@/lib/utils";
+import { formatPrice, formatKm, estimateMonthlyRate, fmtDate } from "@/lib/utils";
 import { DEALER, whatsappLink } from "@/lib/constants";
 import { getT } from "@/lib/i18n/server";
 import {
@@ -149,6 +149,13 @@ export default async function CarDetailPage(props: {
               </div>
             </section>
           )}
+
+          <p className="text-[13px] text-muted">
+            {t.carUpdated}:{" "}
+            <time dateTime={car.updatedAt.toISOString()}>
+              {fmtDate(car.updatedAt, locale)}
+            </time>
+          </p>
 
           {car.description?.trim() && (
             <section className={PANEL_CLASS}>

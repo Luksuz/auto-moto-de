@@ -30,3 +30,14 @@ export function slugify(input: string): string {
     .replace(/(^-|-$)+/g, "")
     .slice(0, 80);
 }
+
+/** Date only, in the visitor's locale. Used for the "last updated" labels, where
+ *  the time of day is noise — a buyer cares whether the offer is from today or
+ *  from three weeks ago. */
+export function fmtDate(date: Date, locale: string = "hr"): string {
+  return new Intl.DateTimeFormat(locale === "de" ? "de-DE" : "hr-HR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}

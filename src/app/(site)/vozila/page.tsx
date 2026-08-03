@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BodyType, FuelType, Transmission } from "@prisma/client";
-import { getCars, getFilterFacets, type CarFilters as CarFiltersType } from "@/lib/cars";
+import {
+  getCars,
+  getFilterFacets,
+  getInventoryUpdatedAt,
+  type CarFilters as CarFiltersType,
+} from "@/lib/cars";
 import { getT } from "@/lib/i18n/server";
+import { fmtDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CarCard } from "@/components/car/car-card";
 import { CarFilters } from "@/components/car/car-filters";
@@ -45,6 +51,7 @@ export default async function VozilaPage(props: {
 }) {
   const sp = await props.searchParams;
   const { t, locale } = await getT();
+  const updatedAt = await getInventoryUpdatedAt();
 
   const brand = first(sp.brand);
   const model = first(sp.model);
@@ -105,6 +112,12 @@ export default async function VozilaPage(props: {
         <h1 className="font-display text-[clamp(28px,6vw,40px)] font-semibold uppercase text-foreground">
           {t.navCars}
         </h1>
+        {updatedAt && (
+          <p className="mt-3 text-[13px] text-muted">
+            {t.lastUpdated}:{" "}
+            <time dateTime={updatedAt.toISOString()}>{fmtDate(updatedAt, locale)}</time>
+          </p>
+        )}
       </header>
 
       <div className="mb-[26px]">

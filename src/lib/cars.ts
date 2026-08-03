@@ -184,3 +184,27 @@ export async function getFilterFacets() {
   }
   return { brands, modelsByBrand };
 }
+
+/** When the public inventory was last refreshed.
+ *
+ *  Read from the newest finished ScrapeRun rather than from Car.updatedAt: a
+ *  sync that found nothing changed still refreshed the offer, and that is what
+ *  "ažurirano" means to a buyer. Falls back to the newest Car.updatedAt so the
+ *  label still works for hand-entered inventory or before the first sync ever
+ *  runs, and returns null when there is nothing at all to show.
+ */
+export async function getInventoryUpdatedAt(): Promise<Date | null> {
+  const [run, car] = await Promise.all([
+    prisma.scrapeRun.findFirst({
+      where: { status: { in: ["SUCCESS", "PARTIAL"] }, finishedAt: { not: null } },
+      orderBy: { finishedAt: "desc" },
+      select: { finishedAt: true },
+    }),
+    prisma.car.findFirst({
+      where: { published: true },
+      orderBy: { updatedAt: "desc" },
+      select: { updatedAt: true },
+    }),
+  ]);
+  return run?.finishedAt ?? car?.updatedAt ?? null;
+}
