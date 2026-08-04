@@ -1,3 +1,4 @@
+import { LOCALE_TAG, type Locale } from "@/lib/i18n/config";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -35,7 +36,7 @@ export function slugify(input: string): string {
  *  the time of day is noise — a buyer cares whether the offer is from today or
  *  from three weeks ago. */
 export function fmtDate(date: Date, locale: string = "hr"): string {
-  return new Intl.DateTimeFormat(locale === "de" ? "de-DE" : "hr-HR", {
+  return new Intl.DateTimeFormat(LOCALE_TAG[locale as Locale] ?? "hr-HR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

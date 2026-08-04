@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { SITE_NAV, DEALER, whatsappLink } from "@/lib/constants";
 import { useLanguage } from "@/components/site/language-provider";
+import { LOCALES, LOCALE_LABEL } from "@/lib/i18n/config";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { WhatsAppIcon } from "@/components/site/icons";
@@ -61,31 +62,25 @@ export function SiteHeader() {
             {open ? <X className="size-6" /> : <Menu className="size-6" />}
           </button>
 
+          {/* Rendered from LOCALES so adding a language needs no change here. */}
           <div className="flex overflow-hidden rounded-full border border-border-strong">
-            <button
-              type="button"
-              onClick={() => setLocale("hr")}
-              className={cn(
-                "px-3.5 py-2 text-[12.5px] font-bold tracking-[1px]",
-                locale === "hr"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted",
-              )}
-            >
-              HR
-            </button>
-            <button
-              type="button"
-              onClick={() => setLocale("de")}
-              className={cn(
-                "px-3.5 py-2 text-[12.5px] font-bold tracking-[1px]",
-                locale === "de"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted",
-              )}
-            >
-              DE
-            </button>
+            {LOCALES.map((code) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => setLocale(code)}
+                aria-label={LOCALE_LABEL[code]}
+                aria-pressed={locale === code}
+                className={cn(
+                  "px-2.5 py-2 text-[12.5px] font-bold tracking-[1px] sm:px-3",
+                  locale === code
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted hover:text-foreground",
+                )}
+              >
+                {LOCALE_LABEL[code]}
+              </button>
+            ))}
           </div>
 
           <Button

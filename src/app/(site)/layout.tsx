@@ -3,7 +3,7 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { LanguageProvider } from "@/components/site/language-provider";
 import { OrganizationJsonLd } from "@/components/site/structured-data";
 import { getLocale } from "@/lib/i18n/server";
-import { oswald, hanken } from "@/lib/fonts";
+import { oswald, hanken, manrope } from "@/lib/fonts";
 
 export default async function SiteLayout({
   children,
@@ -15,7 +15,7 @@ export default async function SiteLayout({
   return (
     <div
       lang={locale}
-      className={`${oswald.variable} ${hanken.variable} theme-autocar flex min-h-dvh flex-col bg-background font-body text-foreground`}
+      className={`${oswald.variable} ${hanken.variable} ${manrope.variable} theme-autocar flex min-h-dvh flex-col bg-background font-body text-foreground`}
     >
       <OrganizationJsonLd />
       <LanguageProvider initialLocale={locale}>
