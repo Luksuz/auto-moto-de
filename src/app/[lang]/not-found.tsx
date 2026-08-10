@@ -1,8 +1,12 @@
 import Link from "next/link";
-import { getT } from "@/lib/i18n/server";
+import { getDict, getHeaderLocale } from "@/lib/i18n/server";
+import { localePath } from "@/lib/i18n/config";
 
+// not-found boundaries receive no route params, so the locale comes from the
+// header the proxy sets.
 export default async function SiteNotFound() {
-  const { t } = await getT();
+  const locale = await getHeaderLocale();
+  const t = getDict(locale);
 
   return (
     <div className="flex flex-col items-center px-5 py-24 text-center">
@@ -16,7 +20,7 @@ export default async function SiteNotFound() {
         {t.notFoundText}
       </p>
       <Link
-        href="/vozila"
+        href={localePath(locale, "/vozila")}
         className="mt-8 bg-primary px-[30px] py-4 font-display text-[15px] font-semibold uppercase tracking-[2px] text-primary-foreground hover:bg-primary-600"
       >
         {t.heroCta}

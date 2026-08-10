@@ -1,16 +1,22 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { localePath, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 
 interface PaginationProps {
   page: number;
   pages: number;
   /** Current search params (without `page`) to preserve in links. */
   params: Record<string, string | undefined>;
+  locale?: Locale;
   prevLabel?: string;
   nextLabel?: string;
 }
 
-function buildHref(params: Record<string, string | undefined>, page: number) {
+function buildHref(
+  params: Record<string, string | undefined>,
+  page: number,
+  locale: Locale,
+) {
   const sp = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (key === "page") continue;
@@ -18,7 +24,7 @@ function buildHref(params: Record<string, string | undefined>, page: number) {
   }
   if (page > 1) sp.set("page", String(page));
   const qs = sp.toString();
-  return `/vozila${qs ? `?${qs}` : ""}`;
+  return localePath(locale, `/vozila${qs ? `?${qs}` : ""}`);
 }
 
 /** Compact page list: 1 … (p-1) p (p+1) … last */
@@ -43,6 +49,7 @@ export function Pagination({
   page,
   pages,
   params,
+  locale = DEFAULT_LOCALE,
   prevLabel = "Prethodna stranica",
   nextLabel = "Sljedeća stranica",
 }: PaginationProps) {
@@ -57,7 +64,7 @@ export function Pagination({
     >
       {page > 1 ? (
         <Link
-          href={buildHref(params, page - 1)}
+          href={buildHref(params, page - 1, locale)}
           className={cn(
             CELL,
             "border-border-strong bg-surface text-foreground hover:border-primary",
@@ -85,7 +92,7 @@ export function Pagination({
         ) : (
           <Link
             key={it}
-            href={buildHref(params, it)}
+            href={buildHref(params, it, locale)}
             aria-current={it === page ? "page" : undefined}
             className={cn(
               CELL,
@@ -101,7 +108,7 @@ export function Pagination({
 
       {page < pages ? (
         <Link
-          href={buildHref(params, page + 1)}
+          href={buildHref(params, page + 1, locale)}
           className={cn(
             CELL,
             "border-border-strong bg-surface text-foreground hover:border-primary",

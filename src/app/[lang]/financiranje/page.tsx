@@ -1,22 +1,29 @@
 import type { Metadata } from "next";
 import { Check, Phone, Target, Zap } from "lucide-react";
-import { getT } from "@/lib/i18n/server";
+import { getT, requireLocale } from "@/lib/i18n/server";
+import { SEO } from "@/lib/i18n/seo-strings";
+import { pageMetadata } from "@/lib/seo";
 import { getCarBySlug } from "@/lib/cars";
 import { FinancingForm } from "@/components/site/forms/financing-form";
 
-export const metadata: Metadata = {
-  title: "Financiranje",
-  description:
-    "Pošaljite upit za financiranje vozila — najpovoljniji uvjeti za sve zaposlene u Njemačkoj i Austriji, brza obrada zahtjeva.",
-  alternates: { canonical: "/financiranje" },
-};
+type Params = { params: Promise<{ lang: string }> };
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = requireLocale((await params).lang);
+  return pageMetadata({
+    ...SEO.financiranje[locale],
+    path: "/financiranje",
+    locale,
+  });
+}
 
 export default async function FinanciranjePage({
+  params,
   searchParams,
-}: {
+}: Params & {
   searchParams: Promise<{ car?: string | string[] }>;
 }) {
-  const { t } = await getT();
+  const { t } = await getT(params);
 
   const { car: carParam } = await searchParams;
   const carSlug = typeof carParam === "string" ? carParam : undefined;

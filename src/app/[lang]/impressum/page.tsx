@@ -1,10 +1,22 @@
 import type { Metadata } from "next";
 import { DEALER } from "@/lib/constants";
 
-export const metadata: Metadata = {
-  title: "Impressum",
-  description: "Pravne informacije i podaci o tvrtki AUTOCAR EU.",
-};
+import { requireLocale } from "@/lib/i18n/server";
+import { SEO } from "@/lib/i18n/seo-strings";
+import { croatianOnlyMetadata } from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const locale = requireLocale((await params).lang);
+  return croatianOnlyMetadata({
+    ...SEO.impressum[locale],
+    path: "/impressum",
+    locale,
+  });
+}
 
 export default function ImpressumPage() {
   return (

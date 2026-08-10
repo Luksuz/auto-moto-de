@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
-import { getT } from "@/lib/i18n/server";
+import { getT, requireLocale } from "@/lib/i18n/server";
+import { SEO } from "@/lib/i18n/seo-strings";
+import { pageMetadata } from "@/lib/seo";
 import { ProblemForm } from "@/components/site/forms/problem-form";
 
-export const metadata: Metadata = {
-  title: "Prijavi problem",
-  description:
-    "Imate problem s vozilom? Ispunite obrazac i naš tim će vam se javiti u najkraćem mogućem roku.",
-  alternates: { canonical: "/prijavi-problem" },
-};
+type Params = { params: Promise<{ lang: string }> };
 
-export default async function PrijaviProblemPage() {
-  const { t } = await getT();
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = requireLocale((await params).lang);
+  return pageMetadata({
+    ...SEO.prijaviProblem[locale],
+    path: "/prijavi-problem",
+    locale,
+  });
+}
+
+export default async function PrijaviProblemPage({ params }: Params) {
+  const { t } = await getT(params);
   const usps = [t.probUsp1, t.probUsp2, t.probUsp3];
 
   return (

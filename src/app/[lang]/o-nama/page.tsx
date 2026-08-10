@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import { DEALER, whatsappLink } from "@/lib/constants";
-import { getT } from "@/lib/i18n/server";
+import { getT, requireLocale } from "@/lib/i18n/server";
+import { SEO } from "@/lib/i18n/seo-strings";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "O nama",
-  description:
-    "AUTOCAR EU — od 2018. prodajemo provjerena vozila iz Njemačke i Austrije. Preko 350 vozila na stanju, garancija do 3 godine i tisuće zadovoljnih kupaca.",
-  alternates: { canonical: "/o-nama" },
-};
+type Params = { params: Promise<{ lang: string }> };
 
-export default async function ONamaPage() {
-  const { t } = await getT();
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = requireLocale((await params).lang);
+  return pageMetadata({ ...SEO.oNama[locale], path: "/o-nama", locale });
+}
+
+export default async function ONamaPage({ params }: Params) {
+  const { t } = await getT(params);
 
   const stats: { value: string; label: string; className: string }[] = [
     {

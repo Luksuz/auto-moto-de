@@ -5,11 +5,22 @@ import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/site/lead-form";
 import { DEALER, FINANCING } from "@/lib/constants";
 
-export const metadata: Metadata = {
-  title: "Uvjeti financiranja",
-  description:
-    "Financiranje vozila uz kamatu od 5,99% do 8,99%, 0% učešća i odobrenje banke unutar jednog radnog dana.",
-};
+import { requireLocale } from "@/lib/i18n/server";
+import { SEO } from "@/lib/i18n/seo-strings";
+import { croatianOnlyMetadata } from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const locale = requireLocale((await params).lang);
+  return croatianOnlyMetadata({
+    ...SEO.uvjetiFinanciranja[locale],
+    path: "/uvjeti-financiranja",
+    locale,
+  });
+}
 
 function rate(value: number): string {
   return value.toFixed(2).replace(".", ",");

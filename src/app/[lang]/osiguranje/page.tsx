@@ -3,19 +3,21 @@ import Image from "next/image";
 import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { INSURANCE_ADVISOR, whatsappLink } from "@/lib/constants";
-import { getT } from "@/lib/i18n/server";
+import { getT, requireLocale } from "@/lib/i18n/server";
+import { SEO } from "@/lib/i18n/seo-strings";
+import { pageMetadata } from "@/lib/seo";
 import { InsuranceForm } from "@/components/site/forms/insurance-form";
 import { WhatsAppIcon } from "@/components/site/icons";
 
-export const metadata: Metadata = {
-  title: "Osiguranje",
-  description:
-    "Auto osiguranje, kasko i sva ostala osiguranja za Njemačku i Austriju — uz osobnog savjetnika koji govori vaš jezik.",
-  alternates: { canonical: "/osiguranje" },
-};
+type Params = { params: Promise<{ lang: string }> };
 
-export default async function OsiguranjePage() {
-  const { t } = await getT();
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = requireLocale((await params).lang);
+  return pageMetadata({ ...SEO.osiguranje[locale], path: "/osiguranje", locale });
+}
+
+export default async function OsiguranjePage({ params }: Params) {
+  const { t } = await getT(params);
 
   return (
     <div>

@@ -7,11 +7,14 @@ import type { CarWithRelations } from "@/lib/cars";
 import { CarCard } from "@/components/car/car-card";
 import { CarGallery } from "@/components/car/car-gallery";
 import { CarDescription } from "@/components/car/car-description";
-import { VehicleJsonLd } from "@/components/site/structured-data";
+import { VehicleJsonLd, BreadcrumbJsonLd } from "@/components/site/structured-data";
 import { Button } from "@/components/ui/button";
 import { formatPrice, formatKm, estimateMonthlyRate, fmtDate } from "@/lib/utils";
 import { DEALER, whatsappLink } from "@/lib/constants";
-import { getT } from "@/lib/i18n/server";
+import { getT, requireLocale } from "@/lib/i18n/server";
+import { CAR_META_SUFFIX, CAR_NOT_FOUND } from "@/lib/i18n/seo-strings";
+import { pageMetadata } from "@/lib/seo";
+import { localePath } from "@/lib/i18n/config";
 import {
   FUEL_LABEL_I18N,
   TRANSMISSION_LABEL_I18N,
@@ -21,33 +24,43 @@ import {
 import type { Locale } from "@/lib/i18n/config";
 import { WhatsAppIcon } from "@/components/site/icons";
 
+/** Trim to `max` on a word boundary so descriptions don't end mid-word. */
+function truncate(text: string, max: number): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[,;:.\-–—]$/, "")}…`;
+}
+
 export async function generateMetadata(props: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ lang: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await props.params;
+  const { lang, slug } = await props.params;
+  const locale = requireLocale(lang);
   const car = await getCarBySlug(slug);
 
   if (!car || !car.published) {
-    return { title: "Vozilo nije pronađeno — AUTOCAR EU" };
+    return {
+      title: CAR_NOT_FOUND[locale],
+      robots: { index: false, follow: true },
+    };
   }
 
   const img = primaryImage(car);
   const description = car.description
-    ? car.description.replace(/\s+/g, " ").trim().slice(0, 160)
+    ? truncate(car.description, 160)
     : `${car.title} — ${formatPrice(car.priceEur)}, ${car.firstRegistration}, ${formatKm(
         car.mileageKm,
-      )}. Provjerena vozila iz Njemačke i Austrije uz mogućnost financiranja.`;
+      )}. ${CAR_META_SUFFIX[locale]}`;
 
-  return {
+  return pageMetadata({
     title: `${car.title} — ${formatPrice(car.priceEur)}`,
     description,
-    alternates: { canonical: `/vozila/${car.slug}` },
-    openGraph: {
-      title: car.title,
-      description,
-      images: img ? [{ url: img }] : undefined,
-    },
-  };
+    path: `/vozila/${car.slug}`,
+    locale,
+    ...(img ? { images: [img] } : {}),
+  });
 }
 
 type TechRow = { label: string; value: string };
@@ -89,14 +102,14 @@ const PANEL_HEADING_CLASS =
   "mb-[18px] font-display text-[17px] font-semibold uppercase tracking-[2px] text-primary";
 
 export default async function CarDetailPage(props: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ lang: string; slug: string }>;
 }) {
   const { slug } = await props.params;
   const car = await getCarBySlug(slug);
 
   if (!car || !car.published) notFound();
 
-  const { t, locale } = await getT();
+  const { t, locale } = await getT(props.params);
   const similar = await getSimilarCars(car, 4);
 
   const techRows = buildTechRows(car, t, locale);
@@ -117,9 +130,16 @@ export default async function CarDetailPage(props: {
 
   return (
     <div className="px-5 py-11 sm:px-10 lg:px-14">
-      <VehicleJsonLd car={car} />
+      <VehicleJsonLd car={car} locale={locale} />
+      <BreadcrumbJsonLd
+        locale={locale}
+        trail={[
+          { name: t.navCars, path: "/vozila" },
+          { name: car.title, path: `/vozila/${car.slug}` },
+        ]}
+      />
       <Link
-        href="/vozila"
+        href={localePath(locale, "/vozila")}
         className="mb-6 inline-block text-[14px] font-semibold uppercase tracking-[1.5px] text-muted-2 hover:text-primary"
       >
         ← {t.backToCars}
@@ -239,7 +259,9 @@ export default async function CarDetailPage(props: {
               </a>
             </Button>
             <Button asChild variant="goldOutline" size="lg" className="w-full text-[14px]">
-              <Link href={`/financiranje?car=${car.slug}`}>{t.reqFinancing}</Link>
+              <Link href={localePath(locale, `/financiranje?car=${car.slug}`)}>
+                {t.reqFinancing}
+              </Link>
             </Button>
           </div>
 

@@ -7,21 +7,72 @@ import {
   getInventoryUpdatedAt,
   type CarFilters as CarFiltersType,
 } from "@/lib/cars";
-import { getT } from "@/lib/i18n/server";
+import { getT, requireLocale } from "@/lib/i18n/server";
+import { SEO } from "@/lib/i18n/seo-strings";
+import { pageMetadata } from "@/lib/seo";
+import { localePath } from "@/lib/i18n/config";
 import { fmtDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CarCard } from "@/components/car/car-card";
 import { CarFilters } from "@/components/car/car-filters";
 import { Pagination } from "@/components/car/pagination";
-
-export const metadata: Metadata = {
-  title: "Ponuda vozila",
-  description:
-    "Pregledajte ponudu provjerenih vozila iz Njemačke i Austrije — AUTOCAR EU. Filtrirajte po marki, modelu, godištu, cijeni i više.",
-  alternates: { canonical: "/vozila" },
-};
+import { BreadcrumbJsonLd } from "@/components/site/structured-data";
 
 type SearchParams = Record<string, string | string[] | undefined>;
+
+type Params = { params: Promise<{ lang: string }> };
+
+/** Every filter the listing accepts. `page` is deliberately not one of them. */
+const FILTER_PARAMS = [
+  "brand",
+  "model",
+  "bodyType",
+  "fuelType",
+  "transmission",
+  "seats",
+  "yearMin",
+  "yearMax",
+  "priceMin",
+  "priceMax",
+  "sort",
+] as const;
+
+/**
+ * Filtered views are near-infinite in number and near-identical in content, so
+ * they get noindex,follow — crawlers still walk through to the car pages, but
+ * the permutations never enter the index.
+ *
+ * Pagination is the opposite case: /vozila?page=3 must self-canonicalize, not
+ * collapse onto page 1, or the cars only reachable from page 3 never get
+ * discovered. Collapsing it is what the previous hardcoded canonical did.
+ */
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Params & { searchParams: Promise<SearchParams> }): Promise<Metadata> {
+  const locale = requireLocale((await params).lang);
+  const sp = await searchParams;
+
+  const isFiltered = FILTER_PARAMS.some((key) => sp[key]);
+  const page = toInt(first(sp.page));
+  const suffix = page && page > 1 ? `?page=${page}` : "";
+
+  const base = pageMetadata({
+    ...SEO.vozila[locale],
+    path: `/vozila${suffix}`,
+    locale,
+  });
+
+  if (isFiltered) {
+    return {
+      ...base,
+      alternates: { canonical: localePath(locale, `/vozila${suffix}`) },
+      robots: { index: false, follow: true },
+    };
+  }
+
+  return base;
+}
 
 function first(value: string | string[] | undefined): string | undefined {
   if (Array.isArray(value)) return value[0];
@@ -47,10 +98,11 @@ function asEnum<T extends string>(
 }
 
 export default async function VozilaPage(props: {
+  params: Promise<{ lang: string }>;
   searchParams: Promise<SearchParams>;
 }) {
   const sp = await props.searchParams;
-  const { t, locale } = await getT();
+  const { t, locale } = await getT(props.params);
   const updatedAt = await getInventoryUpdatedAt();
 
   const brand = first(sp.brand);
@@ -105,6 +157,10 @@ export default async function VozilaPage(props: {
 
   return (
     <div className="mx-auto max-w-[1240px] px-5 py-10 sm:px-10 lg:px-14 lg:py-[52px]">
+      <BreadcrumbJsonLd
+        locale={locale}
+        trail={[{ name: t.navCars, path: "/vozila" }]}
+      />
       <header className="mb-9 text-center">
         <div className="mb-2.5 font-display text-[12px] uppercase tracking-[4px] text-primary">
           {total} {t.inView} · 350+ {t.inStock}
@@ -150,7 +206,7 @@ export default async function VozilaPage(props: {
         <div className="border border-dashed border-border-strong py-14 text-center">
           <p className="mb-3.5 text-[16px] text-muted-2">{t.noResults}</p>
           <Button asChild variant="goldOutline">
-            <Link href="/vozila">{t.filtReset}</Link>
+            <Link href={localePath(locale, "/vozila")}>{t.filtReset}</Link>
           </Button>
         </div>
       ) : (
@@ -171,6 +227,7 @@ export default async function VozilaPage(props: {
               page={currentPage}
               pages={pages}
               params={preserved}
+              locale={locale}
               prevLabel={t.pagePrev}
               nextLabel={t.pageNext}
             />

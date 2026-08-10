@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Euro, Shield, TriangleAlert } from "lucide-react";
 import type { Dict } from "@/lib/i18n/dictionary";
+import { localePath, type Locale } from "@/lib/i18n/config";
 
 /** Three service teaser cards: financing, problem report, insurance. */
-export function ServiceTeasers({ t }: { t: Dict }) {
+export function ServiceTeasers({ t, locale }: { t: Dict; locale: Locale }) {
   const teasers = [
     { href: "/financiranje", Icon: Euro, title: t.navFinancing, text: t.teaserFin },
     { href: "/prijavi-problem", Icon: TriangleAlert, title: t.navProblem, text: t.teaserProb },
@@ -15,7 +16,7 @@ export function ServiceTeasers({ t }: { t: Dict }) {
       {teasers.map(({ href, Icon, title, text }) => (
         <Link
           key={href}
-          href={href}
+          href={localePath(locale, href)}
           className="border border-border p-7 hover:border-primary"
         >
           <Icon className="size-8 text-primary" />

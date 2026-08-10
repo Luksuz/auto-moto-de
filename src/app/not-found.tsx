@@ -1,18 +1,20 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getT } from "@/lib/i18n/server";
+import { getDict, getHeaderLocale } from "@/lib/i18n/server";
+import { localePath } from "@/lib/i18n/config";
 import { oswald, hanken } from "@/lib/fonts";
 
-// Root 404 for unmatched URLs — rendered outside the (site) layout,
-// so it applies the theme scope itself.
+// Root 404 for unmatched URLs — rendered outside the [lang] layout, so it
+// applies the theme scope itself and reads the locale from the proxy header.
 export default async function RootNotFound() {
-  const { t } = await getT();
+  const locale = await getHeaderLocale();
+  const t = getDict(locale);
 
   return (
     <div
       className={`${oswald.variable} ${hanken.variable} theme-autocar flex min-h-dvh flex-col items-center justify-center bg-background px-5 text-center font-body text-foreground`}
     >
-      <Link href="/">
+      <Link href={localePath(locale, "/")}>
         <Image
           src="/brand/autocar-logo.png"
           alt="AUTOCAR EU"
@@ -31,7 +33,7 @@ export default async function RootNotFound() {
         {t.notFoundText}
       </p>
       <Link
-        href="/vozila"
+        href={localePath(locale, "/vozila")}
         className="mt-8 bg-primary px-[30px] py-4 font-display text-[15px] font-semibold uppercase tracking-[2px] text-primary-foreground hover:bg-primary-600"
       >
         {t.heroCta}

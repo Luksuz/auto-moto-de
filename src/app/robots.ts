@@ -8,8 +8,11 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin", "/api", "/feedback"],
+      // The feedback board now lives under a locale prefix (/hr/feedback,
+      // /de/feedback, …), so the bare path no longer matches anything.
+      disallow: ["/admin", "/api", "/feedback", "/*/feedback"],
     },
     sitemap: `${BASE}/sitemap.xml`,
+    host: BASE,
   };
 }

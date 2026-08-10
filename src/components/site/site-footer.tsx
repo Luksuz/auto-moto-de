@@ -1,11 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { DEALER, INFO_NAV, whatsappLink } from "@/lib/constants";
-import { getT } from "@/lib/i18n/server";
+import { getDict } from "@/lib/i18n/server";
+import { localePath, type Locale } from "@/lib/i18n/config";
 import { WhatsAppIcon, FacebookIcon } from "@/components/site/icons";
 
-export async function SiteFooter() {
-  const { t } = await getT();
+export function SiteFooter({ locale }: { locale: Locale }) {
+  const t = getDict(locale);
 
   return (
     <footer className="mt-auto border-t border-border-soft px-5 py-8 text-[13.5px] text-muted-2 sm:px-10 lg:px-14">
@@ -70,7 +71,7 @@ export async function SiteFooter() {
           {INFO_NAV.map((item) => (
             <Link
               key={item.href}
-              href={item.href}
+              href={localePath(locale, item.href)}
               className="transition-colors hover:text-primary"
             >
               {t[item.key]}

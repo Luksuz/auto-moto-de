@@ -1,31 +1,63 @@
 import type { Metadata } from "next";
 import { Mail } from "lucide-react";
-import { LeadForm } from "@/components/site/lead-form";
-import { Button } from "@/components/ui/button";
 import { DEALER, whatsappLink } from "@/lib/constants";
-import { WhatsAppIcon, FacebookIcon } from "@/components/site/icons";
+import { WhatsAppIcon } from "@/components/site/icons";
 
-export const metadata: Metadata = {
-  title: "Termin za preuzimanje",
-  description:
-    "Dogovorite termin za preuzimanje vozila — AUTOCAR EU.",
-};
+import { requireLocale } from "@/lib/i18n/server";
+import { SEO } from "@/lib/i18n/seo-strings";
+import { croatianOnlyMetadata } from "@/lib/seo";
 
-export default function TerminZaPreuzimanjePage() {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const locale = requireLocale((await params).lang);
+  return croatianOnlyMetadata({
+    ...SEO.reklamacije[locale],
+    path: "/reklamacije",
+    locale,
+  });
+}
+
+export default function ReklamacijePage() {
   return (
     <div className="mx-auto max-w-3xl px-5 py-12 sm:px-10 lg:px-14 lg:py-16">
       <h1 className="font-display text-[clamp(28px,6vw,40px)] font-semibold uppercase text-foreground">
-        Termin za preuzimanje
+        Reklamacije
       </h1>
       <p className="mt-4 text-lg leading-relaxed text-muted">
-        Nakon odobrenja financiranja i pripreme dokumentacije, dogovaramo termin
-        za preuzimanje vozila. Javite nam se kako bismo odabrali termin koji vam
-        najviše odgovara.
+        Vaše zadovoljstvo nam je na prvom mjestu. Ako imate prigovor ili
+        reklamaciju u vezi s kupljenim vozilom ili pruženom uslugom, javite nam
+        se — riješit ćemo ga u najkraćem mogućem roku.
       </p>
 
-      <section className="mt-10 border border-border bg-surface p-6 sm:p-8">
+      <section className="mt-10 space-y-4 text-sm leading-relaxed text-foreground/90">
         <h2 className="font-display text-xl font-semibold uppercase tracking-[1px] text-foreground">
-          Kontakt
+          Kako podnijeti reklamaciju
+        </h2>
+        <ol className="list-decimal space-y-2 pl-5">
+          <li>
+            Kontaktirajte nas putem WhatsAppa ili e-mailom i opišite problem.
+          </li>
+          <li>
+            Navedite podatke o vozilu (marka, model, broj šasije) i datum
+            kupnje.
+          </li>
+          <li>
+            Po potrebi priložite fotografije ili dokumentaciju koja potkrepljuje
+            reklamaciju.
+          </li>
+          <li>
+            Naš tim će pregledati reklamaciju i javiti vam se s prijedlogom
+            rješenja.
+          </li>
+        </ol>
+      </section>
+
+      <section className="mt-10 border border-border bg-surface p-6">
+        <h2 className="font-display text-base font-semibold uppercase tracking-[1px] text-foreground">
+          Kontakt za reklamacije
         </h2>
         <ul className="mt-4 space-y-3 text-sm">
           <li className="flex items-center gap-2.5">
@@ -59,38 +91,9 @@ export default function TerminZaPreuzimanjePage() {
               {DEALER.email}
             </a>
           </li>
-          <li className="flex items-center gap-2.5">
-            <FacebookIcon className="text-primary" />
-            <a
-              href={DEALER.facebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-foreground hover:text-primary"
-            >
-              Facebook grupa — AUTOCAR EU
-            </a>
-          </li>
         </ul>
+        <p className="mt-4 text-sm text-muted">{DEALER.name}</p>
       </section>
-
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <LeadForm
-          type="VIEWING"
-          triggerLabel="Zakaži termin"
-          triggerVariant="primary"
-          triggerSize="lg"
-        />
-        <Button asChild variant="whatsapp" size="lg">
-          <a
-            href={whatsappLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <WhatsAppIcon className="size-4" />
-            WhatsApp {DEALER.whatsappDePretty}
-          </a>
-        </Button>
-      </div>
     </div>
   );
 }

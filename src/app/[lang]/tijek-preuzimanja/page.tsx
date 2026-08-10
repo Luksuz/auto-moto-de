@@ -5,11 +5,22 @@ import { Button } from "@/components/ui/button";
 import { DEALER, whatsappLink } from "@/lib/constants";
 import { WhatsAppIcon } from "@/components/site/icons";
 
-export const metadata: Metadata = {
-  title: "Tijek preuzimanja",
-  description:
-    "Kako izgleda preuzimanje vozila — od dogovorenog termina do predaje ključeva.",
-};
+import { requireLocale } from "@/lib/i18n/server";
+import { SEO } from "@/lib/i18n/seo-strings";
+import { croatianOnlyMetadata } from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const locale = requireLocale((await params).lang);
+  return croatianOnlyMetadata({
+    ...SEO.tijekPreuzimanja[locale],
+    path: "/tijek-preuzimanja",
+    locale,
+  });
+}
 
 const STEPS = [
   {

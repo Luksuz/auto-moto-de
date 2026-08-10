@@ -7,14 +7,21 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { SITE_NAV, DEALER, whatsappLink } from "@/lib/constants";
 import { useLanguage } from "@/components/site/language-provider";
-import { LOCALES, LOCALE_LABEL } from "@/lib/i18n/config";
+import {
+  LOCALES,
+  LOCALE_LABEL,
+  localePath,
+  stripLocale,
+} from "@/lib/i18n/config";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { WhatsAppIcon } from "@/components/site/icons";
 
+/** Compares against the locale-stripped path, so /de/vozila matches "/vozila". */
 function isActive(pathname: string, href: string): boolean {
-  if (href === "/") return pathname === "/";
-  return pathname === href || pathname.startsWith(`${href}/`);
+  const path = stripLocale(pathname);
+  if (href === "/") return path === "/";
+  return path === href || path.startsWith(`${href}/`);
 }
 
 export function SiteHeader() {
@@ -25,7 +32,11 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-border-soft bg-background/95 backdrop-blur">
       <div className="flex items-center justify-between gap-5 px-4 py-3.5 sm:px-8 lg:px-12">
-        <Link href="/" onClick={() => setOpen(false)} className="shrink-0">
+        <Link
+          href={localePath(locale, "/")}
+          onClick={() => setOpen(false)}
+          className="shrink-0"
+        >
           <Image
             src="/brand/autocar-logo.png"
             alt="AUTOCAR EU"
@@ -40,7 +51,7 @@ export function SiteHeader() {
           {SITE_NAV.map((item) => (
             <Link
               key={item.href}
-              href={item.href}
+              href={localePath(locale, item.href)}
               className={cn(
                 "text-[13.5px] font-semibold uppercase tracking-[1.5px] transition-colors hover:text-primary",
                 isActive(pathname, item.href) ? "text-primary" : "text-muted",
@@ -105,7 +116,7 @@ export function SiteHeader() {
           {SITE_NAV.map((item) => (
             <Link
               key={item.href}
-              href={item.href}
+              href={localePath(locale, item.href)}
               onClick={() => setOpen(false)}
               className={cn(
                 "border-b border-border-soft/50 py-3.5 text-left text-[15px] font-semibold uppercase tracking-[1.5px] transition-colors hover:text-primary",

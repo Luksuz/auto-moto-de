@@ -1,8 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import { LOCALE_COOKIE, type Locale } from "@/lib/i18n/config";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import {
+  LOCALE_COOKIE,
+  localePath,
+  stripLocale,
+  type Locale,
+} from "@/lib/i18n/config";
 import { DICT, type Dict } from "@/lib/i18n/dictionary";
 
 interface LanguageContextValue {
@@ -21,16 +26,23 @@ export function LanguageProvider({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [locale, setLocaleState] = React.useState<Locale>(initialLocale);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // The URL is the source of truth now, so the prop tracks it on every navigation.
+  const locale = initialLocale;
 
   const setLocale = React.useCallback(
     (next: Locale) => {
+      // Still recorded, but only so a later visit to an unprefixed URL lands on
+      // the language you picked — the proxy reads it. Rendering follows the URL.
       document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
-      setLocaleState(next);
-      // Re-render server components with the new cookie (URL + filters kept).
-      router.refresh();
+
+      const query = searchParams.toString();
+      const target = localePath(next, stripLocale(pathname));
+      router.push(query ? `${target}?${query}` : target);
     },
-    [router],
+    [router, pathname, searchParams],
   );
 
   const value = React.useMemo(

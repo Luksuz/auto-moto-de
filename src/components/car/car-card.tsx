@@ -7,7 +7,7 @@ import {
   FUEL_LABEL_I18N,
   TRANSMISSION_LABEL_I18N,
 } from "@/lib/i18n/dictionary";
-import type { Locale } from "@/lib/i18n/config";
+import { localePath, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 
 interface CarCardProps {
   car: CarWithImages;
@@ -17,7 +17,7 @@ interface CarCardProps {
 
 export function CarCard({
   car,
-  locale = "hr",
+  locale = DEFAULT_LOCALE,
   detailsLabel = "Detalji",
 }: CarCardProps) {
   const img = primaryImage(car);
@@ -27,7 +27,7 @@ export function CarCard({
 
   return (
     <Link
-      href={`/vozila/${car.slug}`}
+      href={localePath(locale, `/vozila/${car.slug}`)}
       className="group block border border-border bg-surface transition-colors hover:border-primary"
     >
       <div className="relative aspect-[3/2] overflow-hidden bg-surface-2">

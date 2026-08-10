@@ -13,6 +13,7 @@ import {
   FUEL_LABEL_I18N,
   TRANSMISSION_LABEL_I18N,
 } from "@/lib/i18n/dictionary";
+import { localePath } from "@/lib/i18n/config";
 
 export interface CarFiltersValues {
   brand?: string;
@@ -107,7 +108,9 @@ export function CarFilters({
     }
     // page resets to 1 on any filter change
     params.delete("page");
-    router.push(`/vozila${params.toString() ? `?${params}` : ""}`);
+    router.push(
+      localePath(locale, `/vozila${params.toString() ? `?${params}` : ""}`),
+    );
   }
 
   /** Apply a change immediately (selects). */
@@ -144,7 +147,7 @@ export function CarFilters({
     setValues(next);
     applied.current = next;
     setShowAdvanced(false);
-    router.push("/vozila");
+    router.push(localePath(locale, "/vozila"));
   }
 
   return (
