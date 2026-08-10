@@ -1,10 +1,11 @@
-export const LOCALES = ["hr", "de", "fr", "uk"] as const;
+export const LOCALES = ["hr", "de", "en", "fr", "uk"] as const;
 export type Locale = (typeof LOCALES)[number];
 
 /** Label for the language switcher. */
 export const LOCALE_LABEL: Record<Locale, string> = {
   hr: "HR",
   de: "DE",
+  en: "EN",
   fr: "FR",
   uk: "UA",
 };
@@ -13,6 +14,7 @@ export const LOCALE_LABEL: Record<Locale, string> = {
 export const LOCALE_TAG: Record<Locale, string> = {
   hr: "hr-HR",
   de: "de-DE",
+  en: "en-GB",
   fr: "fr-FR",
   uk: "uk-UA",
 };
