@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BodyType, FuelType, Transmission } from "@prisma/client";
+import { BodyType, Country, FuelType, Transmission } from "@prisma/client";
 import {
   getCars,
   getFilterFacets,
@@ -24,6 +24,7 @@ type Params = { params: Promise<{ lang: string }> };
 
 /** Every filter the listing accepts. `page` is deliberately not one of them. */
 const FILTER_PARAMS = [
+  "country",
   "brand",
   "model",
   "bodyType",
@@ -105,6 +106,7 @@ export default async function VozilaPage(props: {
   const { t, locale } = await getT(props.params);
   const updatedAt = await getInventoryUpdatedAt();
 
+  const country = asEnum(Country, first(sp.country));
   const brand = first(sp.brand);
   const model = first(sp.model);
   const bodyType = asEnum(BodyType, first(sp.bodyType));
@@ -120,6 +122,7 @@ export default async function VozilaPage(props: {
   const page = toInt(first(sp.page)) ?? 1;
 
   const filters: CarFiltersType = {
+    country,
     brand,
     model,
     bodyType,
@@ -187,6 +190,7 @@ export default async function VozilaPage(props: {
           brands={facets.brands}
           modelsByBrand={facets.modelsByBrand}
           initial={{
+            country,
             brand,
             model,
             bodyType,

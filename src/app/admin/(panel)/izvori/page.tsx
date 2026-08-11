@@ -54,6 +54,13 @@ export default async function IzvoriPage() {
     }),
   ]);
 
+  // Only DE has a working pipeline; AT is here so the split is visible and the
+  // question "where are the Austrian cars?" answers itself.
+  const byCountry = {
+    DE: sources.filter((s) => s.country === "DE"),
+    AT: sources.filter((s) => s.country === "AT"),
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -72,11 +79,11 @@ export default async function IzvoriPage() {
       <Card>
         <CardHeader>
           <CardTitle className="font-display text-base uppercase tracking-[2px]">
-            Novi izvor
+            🇩🇪 Njemačka — novi izvor
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <SourceCreateForm />
+          <SourceCreateForm country="DE" />
         </CardContent>
       </Card>
 
@@ -93,7 +100,7 @@ export default async function IzvoriPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {sources.map((s) => (
+              {byCountry.DE.map((s) => (
                 <tr key={s.id} className="hover:bg-surface-2/50">
                   <td className="px-4 py-3">
                     <div className="font-medium">{s.label}</div>
@@ -135,7 +142,7 @@ export default async function IzvoriPage() {
                   </td>
                 </tr>
               ))}
-              {sources.length === 0 && (
+              {byCountry.DE.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-4 py-10 text-center text-sm text-muted">
                     Još nema dodanih izvora.
@@ -145,6 +152,24 @@ export default async function IzvoriPage() {
             </tbody>
           </table>
         </div>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex flex-wrap items-center gap-2 font-display text-base uppercase tracking-[2px]">
+            🇦🇹 Austrija — novi izvor
+            <Badge variant="warning">Još nije podržano</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SourceCreateForm
+            country="AT"
+            disabled
+            urlLabel="Poveznica na austrijski oglasnik"
+            urlPlaceholder="https://www.autoscout24.at/haendler/..."
+            disabledNote="Automatsko povlačenje vozila iz Austrije još nije implementirano — pipeline za sada čita samo mobile.de. Polja su zaključana da izvor ne bi ostao u redu i beskonačno padao. Struktura je spremna, pa će se austrijski izvori dodavati ovdje čim podrška bude gotova."
+          />
+        </CardContent>
       </Card>
 
       <Card className="overflow-hidden">

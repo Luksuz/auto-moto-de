@@ -39,6 +39,8 @@ export function primaryImage(car: {
 }
 
 export interface CarFilters {
+  /** "DE" | "AT". Only DE has inventory today — see the Country enum. */
+  country?: string;
   brand?: string;
   model?: string;
   bodyType?: string;
@@ -78,6 +80,7 @@ export async function getCars(filters: CarFilters = {}) {
 
   const where: Prisma.CarWhereInput = {
     published: true,
+    ...(filters.country ? { country: filters.country as never } : {}),
     ...(filters.brand ? { brand: filters.brand } : {}),
     ...(filters.model ? { model: filters.model } : {}),
     ...(filters.bodyType ? { bodyType: filters.bodyType as never } : {}),

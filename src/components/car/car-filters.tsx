@@ -16,6 +16,7 @@ import {
 import { localePath } from "@/lib/i18n/config";
 
 export interface CarFiltersValues {
+  country?: string;
   brand?: string;
   model?: string;
   bodyType?: string;
@@ -36,6 +37,7 @@ interface CarFiltersProps {
 }
 
 const PARAM_KEYS = [
+  "country",
   "brand",
   "model",
   "yearMin",
@@ -58,6 +60,7 @@ const FIELD_CLASS = "bg-background border-border-strong";
 
 function normalize(values: CarFiltersValues): Required<CarFiltersValues> {
   return {
+    country: values.country ?? "",
     brand: values.brand ?? "",
     model: values.model ?? "",
     bodyType: values.bodyType ?? "",
@@ -153,6 +156,27 @@ export function CarFilters({
   return (
     <div className="border border-border bg-surface p-[18px]">
       <div className="grid grid-cols-2 items-end gap-3 md:grid-cols-3 lg:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
+        {/* Zemlja — Austrija je vidljiva ali onemogucena: the site advertises
+            cars from both markets, so hiding AT invites the question, while
+            offering it would return an empty page. */}
+        <div>
+          <Label htmlFor="f-country" className={LABEL_CLASS}>
+            {t.filtCountry}
+          </Label>
+          <Select
+            id="f-country"
+            className={FIELD_CLASS}
+            value={values.country}
+            onChange={(e) => apply({ country: e.target.value })}
+          >
+            <option value="">{t.filtAll}</option>
+            <option value="DE">{t.countryDe}</option>
+            <option value="AT" disabled>
+              {t.countryAt} — {t.countrySoon}
+            </option>
+          </Select>
+        </div>
+
         {/* Marka */}
         <div>
           <Label htmlFor="f-brand" className={LABEL_CLASS}>

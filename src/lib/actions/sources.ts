@@ -25,6 +25,16 @@ const sourceSchema = z.object({
     .int()
     .min(1, "Interval mora biti barem 1 dan")
     .max(365, "Interval može biti najviše 365 dana"),
+  // The form disables the Austrian inputs, but a disabled input is a hint to a
+  // browser and nothing more — the pipeline genuinely cannot read an Austrian
+  // marketplace yet, so an AT source would sit in the queue failing every six
+  // hours. Reject it here too.
+  country: z
+    .enum(["DE", "AT"])
+    .default("DE")
+    .refine((c) => c === "DE", {
+      message: "Podrška za Austriju još nije implementirana",
+    }),
 });
 
 export async function createSource(formData: FormData): Promise<SourceActionState> {
@@ -34,6 +44,7 @@ export async function createSource(formData: FormData): Promise<SourceActionStat
     label: formData.get("label"),
     url: formData.get("url"),
     intervalDays: formData.get("intervalDays") || 14,
+    country: formData.get("country") || "DE",
   });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message };
 
@@ -48,6 +59,7 @@ export async function createSource(formData: FormData): Promise<SourceActionStat
       label: parsed.data.label,
       url: parsed.data.url,
       intervalDays: parsed.data.intervalDays,
+      country: parsed.data.country,
       // Due immediately: the next hourly worker tick picks it up.
       nextRunAt: new Date(),
     },
