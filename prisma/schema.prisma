@@ -122,6 +122,11 @@ model Car {
   origin           String? // "EU porijeklo"
   previousOwners   Int?
 
+  /// Which market the car came from, copied from its DealerSource at import so
+  /// the public filter is one indexed column rather than a join — and so
+  /// hand-entered cars (which have no source) still answer the filter.
+  country Country @default(DE)
+
   // Rich text
   description   String? @db.Text
   warranty      String? @db.Text // Garancija
@@ -155,6 +160,20 @@ model Car {
   @@index([featured])
   @@index([priceEur])
   @@index([dealerSourceId])
+  @@index([country])
+}
+
+/// Which national market a car or a dealer belongs to.
+///
+/// Only DE is implemented: the scraping pipeline reads mobile.de, which is the
+/// German marketplace. AT exists so the split is real in the data rather than
+/// bolted on later — the public filter and the admin panel both show it as a
+/// disabled option, because the site advertises cars "iz Njemačke i Austrije"
+/// and buyers ask. Enabling it means teaching the pipeline a second source, not
+/// a migration.
+enum Country {
+  DE
+  AT
 }
 
 /// A dealer inventory page that gets re-scraped on a schedule.
@@ -166,6 +185,10 @@ model DealerSource {
   id    String @id @default(cuid())
   label String
   url   String @unique
+
+  /// Stamped onto every Car this source imports. Every existing source is
+  /// mobile.de, hence the default.
+  country Country @default(DE)
 
   /// mobile.de dealer id, auto-detected from the page on first run. Detail pages
   /// only render their photo gallery on the /home/vip?customerId=…&id=… URL form,
