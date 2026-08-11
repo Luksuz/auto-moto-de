@@ -58,38 +58,43 @@ export function SiteHeader() {
           </Link>
         </div>
 
-        <nav className="hidden flex-wrap items-center gap-[26px] lg:flex">
-          {SITE_NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={localePath(locale, item.href)}
-              className={cn(
-                "text-[13.5px] font-semibold uppercase tracking-[1.5px] transition-colors hover:text-primary",
-                isActive(pathname, item.href) ? "text-primary" : "text-muted",
-              )}
-            >
-              {t[item.key]}
-            </Link>
-          ))}
-        </nav>
+        {/* Everything else sits right: nav, language, WhatsApp. The logo holds
+            the left edge on its own, so the links read as one group with the
+            actions rather than floating in the middle. */}
+        <div className="flex items-center gap-5 lg:gap-7">
+          <nav className="hidden flex-wrap items-center gap-[26px] lg:flex">
+            {SITE_NAV.map((item) => (
+              <Link
+                key={item.href}
+                href={localePath(locale, item.href)}
+                className={cn(
+                  "text-[13.5px] font-semibold uppercase tracking-[1.5px] transition-colors hover:text-primary",
+                  isActive(pathname, item.href) ? "text-primary" : "text-muted",
+                )}
+              >
+                {t[item.key]}
+              </Link>
+            ))}
+          </nav>
 
-        <div className="flex items-center gap-3">
-          <LanguageSwitcher locale={locale} setLocale={setLocale} />
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher locale={locale} setLocale={setLocale} />
 
-          <Button
-            asChild
-            variant="whatsapp"
-            className="hidden font-bold sm:inline-flex"
-          >
-            <a
-              href={whatsappLink(undefined, DEALER.whatsappDe)}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Button
+              asChild
+              variant="whatsapp"
+              className="hidden font-bold sm:inline-flex"
             >
-              <WhatsAppIcon className="size-4" />
-              WhatsApp
-            </a>
-          </Button>
+              <a
+                href={whatsappLink(undefined, DEALER.whatsappDe)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <WhatsAppIcon className="size-4" />
+                WhatsApp
+              </a>
+            </Button>
+          </div>
         </div>
       </div>
 
