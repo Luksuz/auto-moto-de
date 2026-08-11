@@ -50,3 +50,6 @@ next-env.d.ts
 
 # throwaway benchmark/debug harnesses
 scripts/_*.mjs
+
+# local staging for scripts/repack-images.mjs (several GB of photos)
+/.image-repack/
