@@ -73,12 +73,27 @@ export const imageKey = (listingId, hash) => `cars/md-${listingId}-${hash}.jpg`;
 // scripts that already pull them from here keep working.
 export { FULL_WIDTH, FULL_QUALITY, VARIANTS, variantKey, allSizes };
 
+/** Storage is out of space. Distinct from a per-photo failure because it is not
+ *  one: every remaining upload in the run will fail identically, so the caller
+ *  stops instead of manufacturing hundreds of cars with no photos. That is
+ *  exactly what happened on 2026-08-11 — the drive filled 18 minutes into a
+ *  206-car import and the last 54 cars were published photo-less, while the run
+ *  reported SUCCESS because these errors were being discarded. */
+export class StorageFull extends Error {
+  name = "StorageFull";
+}
+
+export const isStorageFull = (err) =>
+  err?.name === "XMinioStorageFull" ||
+  /minimum free drive threshold|storage backend has reached/i.test(err?.message ?? "");
+
 async function withRetry(fn, label, tries = 3, log = () => {}) {
   for (let i = 1; i <= tries; i++) {
     try {
       return await fn();
     } catch (err) {
-      if (i === tries) throw err;
+      // Retrying a full drive just burns the budget three times per photo.
+      if (i === tries || isStorageFull(err)) throw err;
       log(`  retry ${i}/${tries} ${label}: ${String(err.message).slice(0, 100)}`);
       await new Promise((r) => setTimeout(r, 1500 * i));
     }
@@ -142,25 +157,54 @@ export function createImporter({ prisma, s3, bucket, endpoint, log = () => {} })
     return out;
   }
 
+  /** @returns {Promise<{rows: object[], failed: {hash: string, error: string}[]}>}
+   *
+   *  Failures are RETURNED, not swallowed. They used to be `.catch(() => null)`,
+   *  which meant a car whose every photo failed was created silently and the run
+   *  still finished SUCCESS — the failure only surfaced when someone looked at
+   *  the site. The caller reports these so the run lands PARTIAL. */
   async function uploadImages(images, listingId, title, startOrder = 0) {
-    const rows = await Promise.all(
-      images.map((img, i) => {
+    const settled = await Promise.all(
+      images.map(async (img) => {
         const key = imageKey(listingId, img.hash);
-        return withRetry(() => uploadImage(img.url, key), `img ${listingId}/${img.hash}`, 3, log)
-          .then((uploaded) => ({
-            ...uploaded,
-            alt: `${title} — slika ${startOrder + i + 1}`,
-            sortOrder: startOrder + i,
-            isPrimary: startOrder + i === 0,
-          }))
-          .catch(() => null);
+        try {
+          const uploaded = await withRetry(
+            () => uploadImage(img.url, key),
+            `img ${listingId}/${img.hash}`,
+            3,
+            log,
+          );
+          return { ok: true, uploaded };
+        } catch (err) {
+          return { ok: false, hash: img.hash, err };
+        }
       }),
     );
-    return rows.filter(Boolean);
+
+    const full = settled.find((s) => !s.ok && isStorageFull(s.err));
+    if (full) throw new StorageFull(String(full.err.message).slice(0, 120));
+
+    // Numbered after filtering, so a failure in the middle does not leave a hole
+    // in sortOrder — and a failure of the FIRST photo does not leave the car
+    // with no primary image at all.
+    const rows = settled
+      .filter((s) => s.ok)
+      .map((s, i) => ({
+        ...s.uploaded,
+        alt: `${title} — slika ${startOrder + i + 1}`,
+        sortOrder: startOrder + i,
+        isPrimary: startOrder + i === 0,
+      }));
+
+    const failed = settled
+      .filter((s) => !s.ok)
+      .map((s) => ({ hash: s.hash, error: String(s.err.message).slice(0, 80) }));
+
+    return { rows, failed };
   }
 
   /** @returns {{created?:string, updated?:string, skipped?:string, images:number}} */
-  async function importListing(listing, { dealerSourceId = null, dryRun = false } = {}) {
+  async function importListing(listing, { dealerSourceId = null, country = "DE", dryRun = false } = {}) {
     const car = listing.extracted;
 
     if (car.is_car_listing === false) return { skipped: `not a listing: ${listing.listingId}`, images: 0 };
@@ -202,6 +246,9 @@ export function createImporter({ prisma, s3, bucket, endpoint, log = () => {} })
       equipment: car.equipment ?? [],
       sourceUrl: listing.url,
       dealerSourceId,
+      // Copied from the source so the public country filter is one indexed
+      // column instead of a join through DealerSource.
+      country,
     };
 
     if (dryRun) {
@@ -228,19 +275,42 @@ export function createImporter({ prisma, s3, bucket, endpoint, log = () => {} })
       const missing = listing.images.filter((img) => !have.has(imageKey(listing.listingId, img.hash)));
       if (missing.length === 0) return { updated: `${sourceId} (${scalars.title.slice(0, 40)})`, images: 0 };
 
-      const uploaded = await uploadImages(missing, listing.listingId, existing.title, have.size);
-      await prisma.carImage.createMany({ data: uploaded.map((img) => ({ ...img, carId: existing.id })) });
-      return { updated: `${sourceId} (+${uploaded.length} images)`, images: uploaded.length };
+      const { rows, failed } = await uploadImages(missing, listing.listingId, existing.title, have.size);
+      await prisma.carImage.createMany({ data: rows.map((img) => ({ ...img, carId: existing.id })) });
+      return {
+        updated: `${sourceId} (+${rows.length} images)`,
+        images: rows.length,
+        failedImages: failed.length,
+        imageError: failed[0]?.error,
+      };
     }
 
-    const uploaded = await uploadImages(listing.images, listing.listingId, scalars.title);
+    const { rows, failed } = await uploadImages(listing.images, listing.listingId, scalars.title);
+
+    // A car with no photos is close to useless to a buyer, and publishing one is
+    // how a storage failure reached the client's eyes. If the listing HAS photos
+    // and none of them made it, leave the car uncreated — the next run picks it
+    // up cleanly rather than leaving an empty listing to be repaired by hand.
+    if (listing.images.length > 0 && rows.length === 0) {
+      return {
+        skipped: `${listing.listingId}: all ${listing.images.length} photo(s) failed to upload (${failed[0]?.error ?? "unknown"})`,
+        images: 0,
+        failedImages: failed.length,
+      };
+    }
+
     const slug = await uniqueSlug(`${scalars.title} ${reg.replace("/", "")}`);
 
     await prisma.car.create({
-      data: { ...scalars, slug, sourceId, published: true, images: { create: uploaded } },
+      data: { ...scalars, slug, sourceId, published: true, images: { create: rows } },
     });
 
-    return { created: slug, images: uploaded.length };
+    return {
+      created: slug,
+      images: rows.length,
+      failedImages: failed.length,
+      imageError: failed[0]?.error,
+    };
   }
 
   /** Remove cars (and their MinIO objects) that a dealer no longer lists.

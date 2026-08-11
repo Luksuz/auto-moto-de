@@ -7,7 +7,7 @@
 // Everything it needs is injected, so the caller owns the Prisma client, the S3
 // client and the logging.
 import { createFirecrawl, createModel, discoverListings, extractDetail } from "./mobilede.mjs";
-import { createImporter } from "./car-import.mjs";
+import { createImporter, StorageFull } from "./car-import.mjs";
 import { pool } from "./pool.mjs";
 
 // A source that errors should retry sooner than its normal cadence, but must not
@@ -51,7 +51,11 @@ export function createSyncer({
       ? null
       : await prisma.scrapeRun.create({ data: { sourceId: source.id, status: "RUNNING" } });
 
+    // `counts` is spread straight into the ScrapeRun row, so it holds columns
+    // and nothing else. Failed uploads are tracked separately: they belong in
+    // the log line and the problem list, not in the schema.
     const counts = { listingsFound: 0, carsCreated: 0, carsUpdated: 0, carsDeleted: 0, imagesAdded: 0 };
+    let imagesFailed = 0;
     const problems = [];
 
     try {
@@ -90,7 +94,13 @@ export function createSyncer({
       // uploads of earlier listings with the mandatory wait before the next fetch,
       // instead of stacking them end to end.
       let done = 0;
+      // Set when storage runs out. Every remaining upload would fail the same
+      // way, so the run stops rather than spending Firecrawl credits to create
+      // cars it cannot give photos to.
+      let outOfSpace = null;
+
       await pool(found.listings, CONCURRENCY, async (listing) => {
+        if (outOfSpace) return;
         const tag = `[${++done}/${found.listings.length}] ${listing.adId}`;
         try {
           const page = await fetchHtml(listing.url);
@@ -108,21 +118,43 @@ export function createSyncer({
 
           const res = await importer.importListing(record, {
             dealerSourceId: source.id,
+            country: source.country,
             dryRun: DRY,
           });
           if (res.created) counts.carsCreated++;
           if (res.updated) counts.carsUpdated++;
           counts.imagesAdded += res.images ?? 0;
           if (res.skipped) problems.push(res.skipped);
+          // Photos that failed to upload used to vanish here without a trace,
+          // so the run finished SUCCESS with cars that had nothing to show.
+          if (res.failedImages > 0) {
+            imagesFailed += res.failedImages;
+            problems.push(
+              `${listing.adId}: ${res.failedImages} photo(s) failed to upload (${res.imageError ?? "unknown"})`,
+            );
+          }
 
           log(
-            `  ${tag}: ${res.created ? "+ " + res.created : res.updated ? "~ " + res.updated : res.skipped ?? res.dry}`,
+            `  ${tag}: ${res.created ? "+ " + res.created : res.updated ? "~ " + res.updated : res.skipped ?? res.dry}` +
+              (res.failedImages > 0 ? ` [${res.failedImages} photo(s) failed]` : ""),
           );
         } catch (err) {
+          if (err instanceof StorageFull) {
+            outOfSpace ??= err;
+            console.error(`  ${tag}: ✗ storage is full — stopping this source`);
+            return;
+          }
           problems.push(`${listing.adId}: ${String(err.message).slice(0, 120)}`);
           console.error(`  ${tag}: ✗ ${String(err.message).slice(0, 120)}`);
         }
       });
+
+      if (outOfSpace) {
+        throw new Error(
+          `storage full after ${counts.carsCreated} car(s) — stopped before creating more without photos. ` +
+            `Free space, then re-run this source. (${outOfSpace.message})`,
+        );
+      }
 
       // --- stage 3: cars this dealer no longer lists ---
       // Authority is DISCOVERY, not import success: a listing whose detail page
@@ -177,7 +209,8 @@ export function createSyncer({
 
       log(
         `${status}: +${counts.carsCreated} new, ~${counts.carsUpdated} updated, ` +
-          `-${counts.carsDeleted} removed, ${counts.imagesAdded} new photo(s)`,
+          `-${counts.carsDeleted} removed, ${counts.imagesAdded} new photo(s)` +
+          (imagesFailed > 0 ? `, ${imagesFailed} photo(s) FAILED` : ""),
       );
       return status;
     } catch (err) {
