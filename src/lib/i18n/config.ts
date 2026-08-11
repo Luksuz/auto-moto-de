@@ -10,6 +10,28 @@ export const LOCALE_LABEL: Record<Locale, string> = {
   uk: "UA",
 };
 
+/** Flag for the language switcher. Emoji rather than icons so the switcher
+ *  carries no image requests and stays legible at any size — the one caveat is
+ *  Windows, which renders regional-indicator pairs as letters, so the dropdown
+ *  always shows the label next to the flag instead of relying on it alone.
+ *  EN is the UK flag to match LOCALE_TAG's en-GB. */
+export const LOCALE_FLAG: Record<Locale, string> = {
+  hr: "🇭🇷",
+  de: "🇩🇪",
+  en: "🇬🇧",
+  fr: "🇫🇷",
+  uk: "🇺🇦",
+};
+
+/** Full language name, shown in the switcher dropdown next to the flag. */
+export const LOCALE_NAME: Record<Locale, string> = {
+  hr: "Hrvatski",
+  de: "Deutsch",
+  en: "English",
+  fr: "Français",
+  uk: "Українська",
+};
+
 /** BCP 47 tag for Intl formatting; the app's own codes are the short ones. */
 export const LOCALE_TAG: Record<Locale, string> = {
   hr: "hr-HR",

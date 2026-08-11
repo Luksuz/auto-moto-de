@@ -7,12 +7,8 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { SITE_NAV, DEALER, whatsappLink } from "@/lib/constants";
 import { useLanguage } from "@/components/site/language-provider";
-import {
-  LOCALES,
-  LOCALE_LABEL,
-  localePath,
-  stripLocale,
-} from "@/lib/i18n/config";
+import { LanguageSwitcher } from "@/components/site/language-switcher";
+import { localePath, stripLocale } from "@/lib/i18n/config";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { WhatsAppIcon } from "@/components/site/icons";
@@ -32,20 +28,35 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-border-soft bg-background/95 backdrop-blur">
       <div className="flex items-center justify-between gap-5 px-4 py-3.5 sm:px-8 lg:px-12">
-        <Link
-          href={localePath(locale, "/")}
-          onClick={() => setOpen(false)}
-          className="shrink-0"
-        >
-          <Image
-            src="/brand/autocar-logo.png"
-            alt="AUTOCAR EU"
-            width={1522}
-            height={424}
-            preload
-            className="block h-[44px] w-auto sm:h-[52px]"
-          />
-        </Link>
+        {/* Menu first, then the logo. On a phone the thumb reaches the left edge
+            far more easily than the right, and the nav toggle is the only
+            control here that a visitor needs repeatedly. */}
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            className="-ml-1 shrink-0 px-2 py-1 text-foreground lg:hidden"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+          >
+            {open ? <X className="size-6" /> : <Menu className="size-6" />}
+          </button>
+
+          <Link
+            href={localePath(locale, "/")}
+            onClick={() => setOpen(false)}
+            className="shrink-0"
+          >
+            <Image
+              src="/brand/autocar-logo.png"
+              alt="AUTOCAR EU"
+              width={1522}
+              height={424}
+              preload
+              className="block h-[44px] w-auto sm:h-[52px]"
+            />
+          </Link>
+        </div>
 
         <nav className="hidden flex-wrap items-center gap-[26px] lg:flex">
           {SITE_NAV.map((item) => (
@@ -63,36 +74,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            className="px-2 py-1 text-foreground lg:hidden"
-            onClick={() => setOpen((v) => !v)}
-            aria-label={open ? "Close menu" : "Open menu"}
-            aria-expanded={open}
-          >
-            {open ? <X className="size-6" /> : <Menu className="size-6" />}
-          </button>
-
-          {/* Rendered from LOCALES so adding a language needs no change here. */}
-          <div className="flex overflow-hidden rounded-full border border-border-strong">
-            {LOCALES.map((code) => (
-              <button
-                key={code}
-                type="button"
-                onClick={() => setLocale(code)}
-                aria-label={LOCALE_LABEL[code]}
-                aria-pressed={locale === code}
-                className={cn(
-                  "px-2.5 py-2 text-[12.5px] font-bold tracking-[1px] sm:px-3",
-                  locale === code
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted hover:text-foreground",
-                )}
-              >
-                {LOCALE_LABEL[code]}
-              </button>
-            ))}
-          </div>
+          <LanguageSwitcher locale={locale} setLocale={setLocale} />
 
           <Button
             asChild
