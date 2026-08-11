@@ -9,6 +9,13 @@
 // already have.
 import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
+import {
+  FULL_WIDTH,
+  FULL_QUALITY,
+  VARIANTS,
+  variantKey,
+  allSizes,
+} from "../../src/lib/image-sizes.mjs";
 
 const KW_PER_KS = 0.7355;
 const REG_RE = /^(0[1-9]|1[0-2])\/\d{4}$/;
@@ -61,16 +68,10 @@ export function normalizeRegistration(value) {
 
 export const imageKey = (listingId, hash) => `cars/md-${listingId}-${hash}.jpg`;
 
-/** Sizes written for every imported photo. Vercel's image optimizer is off (it
- *  bills per source image and one dealer import exhausts the allowance), so the
- *  responsive variants have to exist as real objects. sharp already runs here,
- *  which makes this nearly free. */
-export const VARIANTS = [
-  { name: "medium", width: 800, quality: 76, suffix: "-800" },
-  { name: "thumb", width: 400, quality: 72, suffix: "-400" },
-];
-
-export const variantKey = (key, suffix) => key.replace(/\.jpg$/, `${suffix}.jpg`);
+// Sizes live in one file shared with the Next app — see the rationale there.
+// Imported (uploadImage below needs them in scope) and re-exported, so the
+// scripts that already pull them from here keep working.
+export { FULL_WIDTH, FULL_QUALITY, VARIANTS, variantKey, allSizes };
 
 async function withRetry(fn, label, tries = 3, log = () => {}) {
   for (let i = 1; i <= tries; i++) {
@@ -122,8 +123,8 @@ export function createImporter({ prisma, s3, bucket, endpoint, log = () => {} })
 
     const full = await upright
       .clone()
-      .resize({ width: 1600, withoutEnlargement: true })
-      .jpeg({ quality: 78, mozjpeg: true })
+      .resize({ width: FULL_WIDTH, withoutEnlargement: true })
+      .jpeg({ quality: FULL_QUALITY, mozjpeg: true })
       .toBuffer();
 
     const out = { url: await putJpeg(key, full), key };

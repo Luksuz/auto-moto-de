@@ -5,6 +5,8 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import sharp from "sharp";
+import { allSizes, VARIANTS, variantKey } from "../src/lib/image-sizes.mjs";
 
 process.loadEnvFile(".env");
 
@@ -146,16 +148,28 @@ const jobs = cars.flatMap((car) =>
 
 const results = await pool(jobs, 8, async ({ car, shot, order }) => {
   const label = `${car.slug.slice(0, 30)}/${shot.part}`;
-  const { buffer, mimeType } = await withRetry(
-    () => generateImage(prompt(car, shot)),
-    label,
-  );
-  const ext = mimeType === "image/png" ? "png" : "jpg";
-  const key = `cars/${car.id}-${String(order + 1).padStart(2, "0")}-${shot.part}.${ext}`;
-  await s3.send(
-    new PutObjectCommand({ Bucket: bucket, Key: key, Body: buffer, ContentType: mimeType }),
-  );
-  console.log(`✓ ${label} (${Math.round(buffer.length / 1024)} KB)`);
+  // mimeType is no longer read: sharp sniffs the format and everything is
+  // re-encoded to JPEG below regardless of what the model returned.
+  const { buffer } = await withRetry(() => generateImage(prompt(car, shot)), label);
+  // The model hands back a PNG at whatever size it likes — often ~1.5 MB, which
+  // stored as-is is ten times a real listing photo and skips the variants
+  // entirely, so cards would pull the full thing. Normalize through the shared
+  // sizes like every other write path.
+  const key = `cars/${car.id}-${String(order + 1).padStart(2, "0")}-${shot.part}.jpg`;
+  const base = sharp(buffer).rotate();
+  let stored = 0;
+  for (const s of allSizes(key)) {
+    const out = await base
+      .clone()
+      .resize({ width: s.width, withoutEnlargement: true })
+      .jpeg({ quality: s.quality, mozjpeg: true })
+      .toBuffer();
+    await s3.send(
+      new PutObjectCommand({ Bucket: bucket, Key: s.key, Body: out, ContentType: "image/jpeg" }),
+    );
+    stored += out.length;
+  }
+  console.log(`✓ ${label} (${Math.round(buffer.length / 1024)} KB -> ${Math.round(stored / 1024)} KB)`);
   return { carId: car.id, key, order, alt: `${car.title} — ${shot.part}` };
 });
 
@@ -165,14 +179,25 @@ for (const car of cars) {
     .filter((r) => r && r.carId === car.id)
     .sort((a, b) => a.order - b.order);
   await prisma.carImage.createMany({
-    data: rows.map((r) => ({
-      carId: car.id,
-      url: publicUrl(r.key),
-      key: r.key,
-      alt: r.alt,
-      sortOrder: r.order,
-      isPrimary: r.order === 0,
-    })),
+    // Point the rows at the variants too, or primaryImage() falls back to `url`
+    // and every card downloads the full-size object.
+    data: rows.map((r) => {
+      const variants = Object.fromEntries(
+        VARIANTS.flatMap((v) => [
+          [`${v.name}Key`, variantKey(r.key, v.suffix)],
+          [`${v.name}Url`, publicUrl(variantKey(r.key, v.suffix))],
+        ]),
+      );
+      return {
+        carId: car.id,
+        url: publicUrl(r.key),
+        key: r.key,
+        alt: r.alt,
+        sortOrder: r.order,
+        isPrimary: r.order === 0,
+        ...variants,
+      };
+    }),
   });
   console.log(`DB: ${rows.length} images for ${car.slug}`);
 }

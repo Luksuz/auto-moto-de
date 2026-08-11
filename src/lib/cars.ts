@@ -18,8 +18,8 @@ const imageOrder: Prisma.CarImageOrderByWithRelationInput[] = [
  *
  *  Returns the 800px variant: this feeds card grids, never a full-bleed hero.
  *  Vercel's optimizer is off (see next.config.ts), so whatever URL is returned
- *  here is what the browser downloads — serving the 1600px original into a
- *  ~400px card would cost ~290 KB per card. Falls back to `url` for
+ *  here is what the browser downloads — serving the 1280px original into a
+ *  ~400px card would cost ~145 KB per card. Falls back to `url` for
  *  hand-uploaded images, which have no variants. */
 export function primaryImage(car: {
   images: {

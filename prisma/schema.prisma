@@ -218,7 +218,7 @@ model CarImage {
   id        String  @id @default(cuid())
   car       Car     @relation(fields: [carId], references: [id], onDelete: Cascade)
   carId     String
-  url       String // full size, 1600px wide
+  url       String // full size, 1280px wide
   key       String // MinIO object key (for deletion)
   alt       String?
   sortOrder Int     @default(0)

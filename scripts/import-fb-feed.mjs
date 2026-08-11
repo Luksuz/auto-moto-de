@@ -10,6 +10,7 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import sharp from "sharp";
+import { FULL_WIDTH, FULL_QUALITY } from "./lib/car-import.mjs";
 
 process.loadEnvFile(".env");
 
@@ -97,8 +98,8 @@ async function importImage(url, key) {
   const input = Buffer.from(await res.arrayBuffer());
   const out = await sharp(input)
     .rotate()
-    .resize({ width: 1600, withoutEnlargement: true })
-    .jpeg({ quality: 78, mozjpeg: true })
+    .resize({ width: FULL_WIDTH, withoutEnlargement: true })
+    .jpeg({ quality: FULL_QUALITY, mozjpeg: true })
     .toBuffer();
   await s3.send(
     new PutObjectCommand({ Bucket: bucket, Key: key, Body: out, ContentType: "image/jpeg" }),
