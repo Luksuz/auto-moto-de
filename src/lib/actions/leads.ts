@@ -25,11 +25,18 @@ const leadSchema = z.object({
   message: z.string().trim().max(8000).optional().or(z.literal("")),
   carId: z.string().trim().optional().or(z.literal("")),
   type: z.nativeEnum(LeadType).default(LeadType.CONTACT),
+  /** Only the e-mail button asks for a notification. The WhatsApp buttons hand
+   *  the enquiry to the dealer in the chat itself, so they skip the mail. */
+  notify: z.boolean().default(false),
 });
 
 export type CreateLeadInput = z.input<typeof leadSchema>;
 
-export type CreateLeadResult = { ok: true } | { ok: false; error: string };
+/** `mailed` is only meaningful when `notify` was set — it reports whether the
+ *  message actually reached the SMTP server, not merely that it was attempted. */
+export type CreateLeadResult =
+  | { ok: true; mailed: boolean }
+  | { ok: false; error: string };
 
 export async function createLead(
   input: CreateLeadInput,
@@ -54,12 +61,22 @@ export async function createLead(
         carId: data.carId ? data.carId : null,
       },
     });
-    // Fire-and-forget — a mail failure must never block the visitor's
-    // WhatsApp handoff; the lead is already saved and visible in admin.
-    sendLeadNotification(lead).catch((err) =>
-      console.error("lead mail failed:", err),
-    );
-    return { ok: true };
+    // Awaited, deliberately. This used to be fire-and-forget so it could not
+    // delay the WhatsApp handoff, but a floating promise is killed when the
+    // serverless invocation is frozen once the response is flushed — two of
+    // the first three enquiries were recorded with no mail ever sent. Only the
+    // e-mail button waits for this, and it has no redirect racing it.
+    let mailed = false;
+    if (data.notify) {
+      try {
+        mailed = await sendLeadNotification(lead);
+      } catch (err) {
+        // The lead is already stored, so this is reported, not thrown — the
+        // visitor is told the mail failed and pointed at WhatsApp instead.
+        console.error("lead mail failed:", err);
+      }
+    }
+    return { ok: true, mailed };
   } catch {
     return {
       ok: false,

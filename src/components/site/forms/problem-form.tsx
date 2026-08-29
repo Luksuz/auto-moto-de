@@ -10,15 +10,16 @@ import { useLeadSubmit } from "@/components/site/forms/use-lead-submit";
 import { composeWaMessage } from "@/lib/leads/compose";
 import { DEALER } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { Field, FormShell, PrivacyNote } from "./form-shell";
+import { Field, FormShell, PrivacyNote, StatusNote } from "./form-shell";
 import { WhatsAppIcon } from "@/components/site/icons";
+import { Mail } from "lucide-react";
 
 const INPUT = "bg-background border-border-strong";
 
 export function ProblemForm() {
   const t = useT();
   const locale = useLocale();
-  const { submit, pending } = useLeadSubmit();
+  const { submit, pending, status } = useLeadSubmit();
   const [problemType, setProblemType] = React.useState<string | null>(null);
   const [typeError, setTypeError] = React.useState(false);
 
@@ -28,6 +29,10 @@ export function ProblemForm() {
       setTypeError(true);
       return;
     }
+    // Which of the two buttons was pressed decides how the report is sent.
+    const submitter = (e.nativeEvent as SubmitEvent)
+      .submitter as HTMLButtonElement | null;
+    const channel = submitter?.value === "email" ? "email" : "whatsapp";
     const fd = new FormData(e.currentTarget);
     const v = (name: string) => String(fd.get(name) ?? "").trim();
 
@@ -50,7 +55,7 @@ export function ProblemForm() {
       ],
     );
 
-    void submit({
+    void submit(channel, {
       type: "PROBLEM",
       name: v("ime"),
       phone: v("telefon"),
@@ -184,16 +189,40 @@ export function ProblemForm() {
 
         <PrivacyNote text={t.privacy} />
 
-        <Button
-          type="submit"
-          variant="whatsapp"
-          size="lg"
-          className="w-full"
-          disabled={pending}
-        >
-          <WhatsAppIcon className="size-4" />
-          {(pending ? t.sending : t.probSend) + " →"}
-        </Button>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Button
+            type="submit"
+            name="ch"
+            value="wa"
+            variant="whatsapp"
+            size="lg"
+            className="h-auto w-full whitespace-normal py-3.5"
+            disabled={pending}
+          >
+            <WhatsAppIcon className="size-4" />
+            {(pending ? t.sending : t.probSend) + " →"}
+          </Button>
+          <Button
+            type="submit"
+            name="ch"
+            value="email"
+            variant="primary"
+            size="lg"
+            className="h-auto w-full whitespace-normal py-3.5"
+            disabled={pending}
+          >
+            <Mail className="size-4" />
+            {pending ? t.sending : t.sendEmail}
+          </Button>
+        </div>
+
+        <StatusNote
+          status={status}
+          sentText={t.emailSent}
+          mailFailedText={t.emailFailed}
+          errorText={t.formError}
+        />
+
         <p className="mt-3 text-center text-[13.5px] text-muted-2">
           {t.respond}
         </p>

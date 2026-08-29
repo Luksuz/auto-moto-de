@@ -20,8 +20,11 @@ const transporter = enabled
     })
   : null;
 
-export async function sendLeadNotification(lead: Lead): Promise<void> {
-  if (!transporter) return;
+/** Resolves true only when the message was actually handed to the SMTP server,
+ *  so the caller can tell "sent" apart from "silently skipped, no credentials"
+ *  and show the visitor the truth. */
+export async function sendLeadNotification(lead: Lead): Promise<boolean> {
+  if (!transporter) return false;
 
   const to = process.env.LEAD_NOTIFY_TO || "insurance@autocareu.com";
   const typeLabel = LEAD_TYPE_LABEL[lead.type];
@@ -44,4 +47,5 @@ export async function sendLeadNotification(lead: Lead): Promise<void> {
       .filter((line) => line !== null)
       .join("\n"),
   });
+  return true;
 }

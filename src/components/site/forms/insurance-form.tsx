@@ -9,7 +9,8 @@ import { useLeadSubmit } from "@/components/site/forms/use-lead-submit";
 import { composeWaMessage } from "@/lib/leads/compose";
 import { INSURANCE_ADVISOR } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { Field, FormShell, PrivacyNote } from "./form-shell";
+import { Field, FormShell, PrivacyNote, StatusNote } from "./form-shell";
+import { Mail } from "lucide-react";
 import { WhatsAppIcon } from "@/components/site/icons";
 
 const INPUT = "bg-background border-border-strong";
@@ -17,12 +18,15 @@ const INPUT = "bg-background border-border-strong";
 export function InsuranceForm() {
   const t = useT();
   const locale = useLocale();
-  const { submit, pending } = useLeadSubmit();
+  const { submit, pending, status } = useLeadSubmit();
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const submitter = (e.nativeEvent as SubmitEvent)
       .submitter as HTMLButtonElement | null;
+    // Three buttons here: the e-mail one, and one WhatsApp button per
+    // advisor number. Only the WhatsApp pair needs a number.
+    const channel = submitter?.value === "email" ? "email" : "whatsapp";
     const waNumber =
       submitter?.value === "at"
         ? INSURANCE_ADVISOR.whatsappAt
@@ -50,7 +54,7 @@ export function InsuranceForm() {
       ],
     );
 
-    void submit({
+    void submit(channel, {
       type: "INSURANCE",
       name: v("ime"),
       phone: v("telefon"),
@@ -176,6 +180,27 @@ export function InsuranceForm() {
             {t.insSendAt}
           </Button>
         </div>
+
+        <Button
+          type="submit"
+          name="wa"
+          value="email"
+          variant="primary"
+          size="lg"
+          className="mt-3 h-auto w-full whitespace-normal py-3.5"
+          disabled={pending}
+        >
+          <Mail className="size-4" />
+          {pending ? t.sending : t.sendEmail}
+        </Button>
+
+        <StatusNote
+          status={status}
+          sentText={t.emailSent}
+          mailFailedText={t.emailFailed}
+          errorText={t.formError}
+        />
+
         <p className="mt-3 text-center text-[13.5px] text-muted-2">
           {t.respond}
         </p>
