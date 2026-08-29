@@ -1,6 +1,7 @@
 import * as React from "react";
-import { Lock } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { LeadStatus } from "./use-lead-submit";
 
 /**
  * Shared presentational pieces for the dark lead-form panels
@@ -47,6 +48,50 @@ export function Field({
       </span>
       {children}
     </label>
+  );
+}
+
+/** Outcome of an e-mail submission. The WhatsApp buttons navigate away, so
+ *  nothing is ever rendered for them. */
+export function StatusNote({
+  status,
+  sentText,
+  mailFailedText,
+  errorText,
+}: {
+  status: LeadStatus | null;
+  sentText: string;
+  mailFailedText: string;
+  errorText: string;
+}) {
+  if (!status) return null;
+
+  const ok = status.kind === "sent";
+  const text =
+    status.kind === "sent"
+      ? sentText
+      : status.kind === "mailFailed"
+        ? mailFailedText
+        : (status.message ?? errorText);
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className={cn(
+        "mt-4 flex items-start gap-3 border px-4 py-3.5 text-[13.5px]",
+        ok
+          ? "border-[#2A4030] bg-[#16241B] text-[#B7E3C4]"
+          : "border-[#4A3320] bg-[#2A1D12] text-[#F0C48A]",
+      )}
+    >
+      {ok ? (
+        <CheckCircle2 className="mt-px size-4 shrink-0" />
+      ) : (
+        <AlertTriangle className="mt-px size-4 shrink-0" />
+      )}
+      <span>{text}</span>
+    </div>
   );
 }
 

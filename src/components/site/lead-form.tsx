@@ -9,6 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createLead } from "@/lib/actions/leads";
+import { composeWaMessage } from "@/lib/leads/compose";
+import { DEALER, whatsappLink } from "@/lib/constants";
+import { WhatsAppIcon } from "@/components/site/icons";
 import { oswald, hanken } from "@/lib/fonts";
 
 const TITLES: Record<LeadType, string> = {
@@ -88,15 +91,40 @@ export function LeadForm({
 
     const form = e.currentTarget;
     const fd = new FormData(form);
+    const v = (name: string) => String(fd.get(name) ?? "");
+    // Which of the two buttons was pressed decides how the enquiry is sent.
+    const submitter = (e.nativeEvent as SubmitEvent)
+      .submitter as HTMLButtonElement | null;
+    const channel = submitter?.value === "wa" ? "whatsapp" : "email";
+
+    // The panel forms hand over a composed body; this one has only a free-text
+    // field, so name and phone are prepended or the chat arrives anonymous.
+    const message =
+      channel === "whatsapp"
+        ? composeWaMessage(`${TITLES[type].toUpperCase()} — AUTOCAR EU`, [
+            ["Ime i prezime", v("name")],
+            ["Broj telefona", v("phone")],
+            ["E-mail", v("email")],
+            ["Poruka", v("message")],
+          ])
+        : v("message");
 
     const result = await createLead({
-      name: String(fd.get("name") ?? ""),
-      phone: String(fd.get("phone") ?? ""),
-      email: String(fd.get("email") ?? ""),
-      message: String(fd.get("message") ?? ""),
+      name: v("name"),
+      phone: v("phone"),
+      email: v("email"),
+      message,
       carId: carId ?? "",
       type,
+      notify: channel === "email",
     });
+
+    if (channel === "whatsapp") {
+      // Hand over even when the record failed — the enquiry reaches the dealer
+      // in the chat either way; only the admin row is lost.
+      window.location.href = whatsappLink(message, DEALER.whatsappDe);
+      return;
+    }
 
     setPending(false);
 
@@ -237,18 +265,34 @@ export function LeadForm({
                           </p>
                         )}
 
-                        <Button
-                          type="submit"
-                          variant="primary"
-                          size="lg"
-                          className="w-full"
-                          disabled={pending}
-                        >
-                          {pending && (
-                            <Loader2 className="size-4 animate-spin" />
-                          )}
-                          {pending ? "Slanje..." : "Pošalji"}
-                        </Button>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <Button
+                            type="submit"
+                            name="ch"
+                            value="wa"
+                            variant="whatsapp"
+                            size="lg"
+                            className="h-auto w-full whitespace-normal py-3.5"
+                            disabled={pending}
+                          >
+                            <WhatsAppIcon className="size-4" />
+                            Pošalji putem WhatsApp-a
+                          </Button>
+                          <Button
+                            type="submit"
+                            name="ch"
+                            value="email"
+                            variant="primary"
+                            size="lg"
+                            className="h-auto w-full whitespace-normal py-3.5"
+                            disabled={pending}
+                          >
+                            {pending && (
+                              <Loader2 className="size-4 animate-spin" />
+                            )}
+                            {pending ? "Slanje..." : "Pošalji e-mailom"}
+                          </Button>
+                        </div>
 
                         <p className="text-center text-xs text-muted">
                           Slanjem pristajete da vas kontaktiramo radi vašeg upita.
