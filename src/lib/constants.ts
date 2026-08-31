@@ -14,7 +14,10 @@ export const SITE_URL =
 /** Dealership / contact info shown across the site. */
 export const DEALER = {
   name: "AUTOCAR EU",
-  email: "autocareupremium@gmail.com",
+  // On the dealer's own domain, which ImprovMX routes (mx1/mx2.improvmx.com) —
+  // the previous autocareupremium@gmail.com address did not exist, so every
+  // mailto on the site, in the Impressum and in the JSON-LD bounced.
+  email: "info@autocareu.com",
   whatsappDe: "491713682790",
   whatsappDePretty: "+49 171 3682790",
   whatsappHr: "385915940692",
