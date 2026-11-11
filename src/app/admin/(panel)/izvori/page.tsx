@@ -35,11 +35,11 @@ function fmtDate(d: Date | null) {
   }).format(d);
 }
 
-/** The worker ticks hourly, so a due date in the past means "in the next hour"
- *  rather than "overdue" — say that instead of showing a stale timestamp. */
+/** The scheduler checks every minute, so a due date in the past means "about
+ *  to start" (or queued behind a running sync) rather than "overdue". */
 function fmtNextRun(d: Date, enabled: boolean) {
   if (!enabled) return "pauzirano";
-  return d.getTime() <= Date.now() ? "u sljedećem satu" : fmtDate(d);
+  return d.getTime() <= Date.now() ? "na redu" : fmtDate(d);
 }
 
 export default async function IzvoriPage() {
@@ -70,9 +70,10 @@ export default async function IzvoriPage() {
         <h1 className="font-display text-2xl font-semibold uppercase">Izvori vozila</h1>
         <p className="mt-2 max-w-3xl text-sm text-muted">
           Trgovci s mobile.de čija se ponuda automatski povlači i osvježava. Svaki se
-          izvor obrađuje prema svom intervalu (zadano svakih 14 dana): nova se vozila
+          izvor obrađuje prema svom intervalu (zadano svakih 10 dana): nova se vozila
           dodaju, postojećima se osvježavaju cijena i kilometraža, a prodana vozila
-          brišu se zajedno s fotografijama.
+          brišu se zajedno s fotografijama. Brisanjem auto kuće brišu se i sva njezina
+          vozila s fotografijama.
         </p>
       </div>
 
@@ -138,6 +139,7 @@ export default async function IzvoriPage() {
                       label={s.label}
                       enabled={s.enabled}
                       intervalDays={s.intervalDays}
+                      carCount={s.carCount}
                     />
                   </td>
                 </tr>

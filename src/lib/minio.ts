@@ -2,6 +2,7 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  DeleteObjectsCommand,
   HeadBucketCommand,
   CreateBucketCommand,
   PutBucketPolicyCommand,
@@ -91,4 +92,33 @@ export async function putObject(
 
 export async function deleteObject(key: string): Promise<void> {
   await s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
+}
+
+/** Deletes many objects, 1000 per request (the S3 limit). Best-effort: returns
+ *  how many keys could not be removed instead of throwing, because by the time
+ *  this runs the rows pointing at them are already gone, and an orphaned photo
+ *  costs storage while a thrown error would make a finished delete look failed. */
+export async function deleteObjects(keys: string[]): Promise<{ failed: number }> {
+  const batches: string[][] = [];
+  for (let i = 0; i < keys.length; i += 1000) batches.push(keys.slice(i, i + 1000));
+  let failed = 0;
+  // A few at a time: a big dealer is ~20 batches, and MinIO is fine with this.
+  for (let i = 0; i < batches.length; i += 4) {
+    const results = await Promise.allSettled(
+      batches.slice(i, i + 4).map((batch) =>
+        s3.send(
+          new DeleteObjectsCommand({
+            Bucket: bucket,
+            Delete: { Objects: batch.map((Key) => ({ Key })), Quiet: true },
+          }),
+        ),
+      ),
+    );
+    results.forEach((r, j) => {
+      const size = batches[i + j].length;
+      if (r.status === "rejected") failed += size;
+      else failed += r.value.Errors?.length ?? 0;
+    });
+  }
+  return { failed };
 }

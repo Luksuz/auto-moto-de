@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Car, CheckCircle2, Star, Inbox } from "lucide-react";
+import { requireUser } from "@/lib/auth-helpers";
+import { ScanControl } from "@/components/admin/scan-control";
 import { prisma } from "@/lib/prisma";
 import { primaryImage } from "@/lib/cars";
 import { formatPrice } from "@/lib/utils";
@@ -18,7 +20,48 @@ const STATUS_VARIANT: Record<LeadStatus, "warning" | "primary" | "success"> = {
   CLOSED: "success",
 };
 
+// The scan card shows live sync state written by the Railway scheduler.
+export const dynamic = "force-dynamic";
+
+function fmtTime(d: Date) {
+  return new Intl.DateTimeFormat("hr-HR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/Zagreb",
+  }).format(d);
+}
+
+/** Scan state for the dashboard card: what is running, what is queued. */
+async function scanStatus() {
+  const [sources, running, lastDone] = await Promise.all([
+    prisma.dealerSource.findMany({
+      orderBy: { label: "asc" },
+      select: { id: true, label: true, enabled: true, nextRunAt: true },
+    }),
+    prisma.scrapeRun.findFirst({
+      where: { status: "RUNNING" },
+      orderBy: { startedAt: "desc" },
+      select: { startedAt: true, sourceId: true, source: { select: { label: true } } },
+    }),
+    prisma.scrapeRun.findFirst({
+      where: { status: { not: "RUNNING" }, finishedAt: { not: null } },
+      orderBy: { finishedAt: "desc" },
+      select: { finishedAt: true, source: { select: { label: true } } },
+    }),
+  ]);
+  const now = Date.now();
+  const queued = sources.filter(
+    (s) => s.enabled && s.nextRunAt.getTime() <= now && s.id !== running?.sourceId,
+  ).length;
+  return { sources, running, lastDone, queued };
+}
+
 export default async function DashboardPage() {
+  const user = await requireUser();
+  const scan = user.role === "ADMIN" ? await scanStatus() : null;
+
   const [
     totalCars,
     publishedCars,
@@ -83,6 +126,44 @@ export default async function DashboardPage() {
           );
         })}
       </div>
+
+      {scan && (
+        <Card>
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle className="font-display text-base uppercase tracking-[2px]">
+              Skeniranje auto kuća
+            </CardTitle>
+            <Link
+              href="/admin/izvori"
+              className="font-display text-[12px] uppercase tracking-[2px] text-primary hover:underline"
+            >
+              Sve auto kuće
+            </Link>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted">
+              {scan.running ? (
+                <span className="flex items-center gap-2">
+                  <Badge variant="primary">U tijeku</Badge>
+                  {scan.running.source.label}, od {fmtTime(scan.running.startedAt)}
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Badge variant="neutral">Mirovanje</Badge>
+                  Trenutno se ništa ne skenira
+                </span>
+              )}
+              {scan.queued > 0 && <span>Na redu: {scan.queued}</span>}
+              {scan.lastDone?.finishedAt && (
+                <span>
+                  Zadnje završeno: {scan.lastDone.source.label}, {fmtTime(scan.lastDone.finishedAt)}
+                </span>
+              )}
+            </div>
+            <ScanControl sources={scan.sources} />
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

@@ -83,8 +83,9 @@ graceful shutdown when a deploy lands mid-run.
 
 `scripts/scheduler.mjs` therefore:
 
-- ticks every `TICK_MINUTES` (default 10) and asks only "is anything due?",
-  which is one indexed query when the answer is no
+- ticks every `TICK_MINUTES` (default 1) and asks only "is anything due?",
+  which is one indexed query when the answer is no — so the scan buttons in
+  the admin panel start a sync within a minute
 - runs one sync at a time; a tick arriving mid-run is skipped and logged, never
   queued behind it
 - finishes the current run on SIGTERM before exiting (up to
@@ -94,9 +95,14 @@ graceful shutdown when a deploy lands mid-run.
 - serves `GET /health` with live status if `PORT` is set
 
 The cadence itself still lives per-dealer in `DealerSource.intervalDays`
-(default 14), so each dealer can differ, a missed tick self-heals on the next
-one, and the admin panel's "Pokreni" button is just `nextRunAt = now()` — no
-HTTP call from Vercel to Railway to secure or time out.
+(default 10), so each dealer can differ, a missed tick self-heals on the next
+one, and the admin panel's scan buttons ("Pokreni skeniranje" on the dashboard
+for all dealers or one, "Pokreni" per dealer under Izvori) are just
+`nextRunAt = now()` — no HTTP call from Vercel to Railway to secure or time out.
+
+Deleting a dealer under Izvori deletes every car it imported and all of their
+photos (every size) from MinIO. It is refused while that dealer's sync is
+running, since the sync would keep writing cars for it.
 
 **Throughput is bounded by Firecrawl, not by this service**, and Firecrawl
 enforces *two* limits that must both be respected:

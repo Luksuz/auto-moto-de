@@ -266,6 +266,18 @@ export function createSyncer({
         ? { enabled: true }
         : { enabled: true, nextRunAt: { lte: new Date() } };
 
+    // nextRunAt is stamped from the interval a run held in memory when it
+    // finished, so a shorter interval set in the admin panel (or while a run
+    // was in flight) would otherwise only apply after one more wait at the old
+    // length. Pull every schedule in to lastRunAt + the current interval.
+    if (!DRY) {
+      await prisma.$executeRaw`
+        UPDATE "DealerSource"
+        SET "nextRunAt" = "lastRunAt" + make_interval(days => "intervalDays")
+        WHERE "lastRunAt" IS NOT NULL
+          AND "nextRunAt" > "lastRunAt" + make_interval(days => "intervalDays")`;
+    }
+
     const sources = await prisma.dealerSource.findMany({ where, orderBy: { nextRunAt: "asc" } });
     if (sources.length === 0) {
       log("nothing due");

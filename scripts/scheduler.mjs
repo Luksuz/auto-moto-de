@@ -24,7 +24,8 @@
 //     otherwise the admin panel shows "U tijeku" forever
 //
 // Env: everything in SYNC_ENV, plus
-//   TICK_MINUTES        how often to look for due sources (default 10)
+//   TICK_MINUTES        how often to look for due sources (default 1, so the
+//                       admin panel's scan buttons start within a minute)
 //   RUN_ON_START        "0" to wait for the first tick instead of running now
 //   STALE_RUN_MINUTES   age at which an abandoned RUNNING row is failed (default 240)
 //   SHUTDOWN_GRACE_S    how long to let a run finish on SIGTERM (default 900)
@@ -36,7 +37,7 @@ import { createClients, loadEnv, requireEnv, syncConfig, SYNC_ENV } from "./lib/
 loadEnv();
 requireEnv(SYNC_ENV);
 
-const TICK_MS = Number(process.env.TICK_MINUTES || 10) * 60_000;
+const TICK_MS = Number(process.env.TICK_MINUTES || 1) * 60_000;
 const RUN_ON_START = process.env.RUN_ON_START !== "0";
 const STALE_RUN_MINUTES = Number(process.env.STALE_RUN_MINUTES || 240);
 const SHUTDOWN_GRACE_MS = Number(process.env.SHUTDOWN_GRACE_S || 900) * 1000;
@@ -63,8 +64,10 @@ async function tick(reason) {
   if (state.stopping) return;
   if (state.running) {
     state.skipped++;
+    // With a one-minute tick a multi-hour run would log a line a minute; one
+    // every ten is enough to show it is still alive.
     const mins = Math.round((Date.now() - state.runStartedAt) / 60_000);
-    log(`tick skipped (${reason}) — a run has been going for ${mins} min`);
+    if (state.skipped % 10 === 1) log(`tick skipped (${reason}) — a run has been going for ${mins} min`);
     return;
   }
 

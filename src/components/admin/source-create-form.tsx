@@ -109,7 +109,7 @@ export function SourceCreateForm({
               type="number"
               min={1}
               max={365}
-              defaultValue={14}
+              defaultValue={10}
               className="w-32 bg-background border-border-strong"
             />
           </div>
@@ -131,7 +131,7 @@ export function SourceCreateForm({
         )}
         {success && (
           <p className="border border-success/40 bg-surface-2 px-3 py-2 text-sm text-success">
-            Izvor je dodan i bit će obrađen u sljedećem satu.
+            Izvor je dodan. Skeniranje kreće za koju minutu.
           </p>
         )}
 

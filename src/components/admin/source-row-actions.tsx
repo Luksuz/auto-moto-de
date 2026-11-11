@@ -17,20 +17,25 @@ export function SourceRowActions({
   label,
   enabled,
   intervalDays,
+  carCount,
 }: {
   id: string;
   label: string;
   enabled: boolean;
   intervalDays: number;
+  carCount: number;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [interval, setInterval] = useState(String(intervalDays));
   const [confirming, setConfirming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const run = (fn: () => Promise<unknown>) =>
+  const run = (fn: () => Promise<{ ok?: boolean; error?: string }>) =>
     startTransition(async () => {
-      await fn();
+      setError(null);
+      const res = await fn();
+      if (res && res.ok === false) setError(res.error ?? "Greška.");
       router.refresh();
     });
 
@@ -61,7 +66,7 @@ export function SourceRowActions({
         size="sm"
         disabled={pending}
         onClick={() => run(() => runSourceNow(id))}
-        title="Označi za obradu u sljedećem satu"
+        title="Skeniraj ovu auto kuću sada"
       >
         <Play className="size-4" />
         Pokreni
@@ -77,14 +82,23 @@ export function SourceRowActions({
       </Button>
 
       {confirming ? (
-        <span className="flex items-center gap-1">
+        <span className="flex flex-wrap items-center justify-end gap-1">
+          <span className="text-xs text-error">
+            Obrisati {label} i {carCount} {carCount === 1 ? "vozilo" : "vozila"} s fotografijama?
+          </span>
           <Button
             variant="primary"
             size="sm"
             disabled={pending}
-            onClick={() => run(() => deleteSource(id))}
+            onClick={() =>
+              run(async () => {
+                const res = await deleteSource(id);
+                if (!res.ok) setConfirming(false);
+                return res;
+              })
+            }
           >
-            Potvrdi
+            {pending ? "Brisanje..." : "Potvrdi"}
           </Button>
           <Button variant="outline" size="sm" disabled={pending} onClick={() => setConfirming(false)}>
             Odustani
@@ -96,11 +110,14 @@ export function SourceRowActions({
           size="sm"
           disabled={pending}
           onClick={() => setConfirming(true)}
-          title="Ukloni izvor (vozila ostaju)"
+          title="Ukloni auto kuću i sva njezina vozila s fotografijama"
+          aria-label={`Ukloni ${label}`}
         >
           <Trash2 className="size-4" />
         </Button>
       )}
+
+      {error && <p className="basis-full text-right text-xs text-error">{error}</p>}
     </div>
   );
 }

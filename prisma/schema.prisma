@@ -196,7 +196,7 @@ model DealerSource {
   customerId String?
 
   enabled      Boolean @default(true)
-  intervalDays Int     @default(14)
+  intervalDays Int     @default(10)
 
   /// The worker's queue: it picks up every enabled source whose nextRunAt has
   /// passed. "Scrape now" in the admin panel just sets this to now().

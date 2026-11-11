@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-helpers";
+import { deleteObjects } from "@/lib/minio";
 
 export type SourceActionState = { ok?: boolean; error?: string };
 
@@ -43,7 +44,7 @@ export async function createSource(formData: FormData): Promise<SourceActionStat
   const parsed = sourceSchema.safeParse({
     label: formData.get("label"),
     url: formData.get("url"),
-    intervalDays: formData.get("intervalDays") || 14,
+    intervalDays: formData.get("intervalDays") || 10,
     country: formData.get("country") || "DE",
   });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message };
@@ -92,9 +93,9 @@ export async function toggleSourceEnabled(
   return { ok: true };
 }
 
-/** "Scrape now" is just a due date. The worker on Railway ticks hourly and picks
- *  up anything due, so there is no HTTP call from Vercel to Railway to secure,
- *  and no request that can time out mid-scrape. */
+/** "Scrape now" is just a due date. The scheduler on Railway checks every
+ *  minute and picks up anything due, so there is no HTTP call from Vercel to
+ *  Railway to secure, and no request that can time out mid-scrape. */
 export async function runSourceNow(id: string): Promise<SourceActionState> {
   await requireAdmin();
   await prisma.dealerSource.update({
@@ -102,15 +103,77 @@ export async function runSourceNow(id: string): Promise<SourceActionState> {
     data: { enabled: true, nextRunAt: new Date() },
   });
   revalidatePath(PANEL);
+  revalidatePath("/admin");
   return { ok: true };
 }
 
-/** Removes the source. Cars it imported stay (Car.dealerSourceId is SetNull) —
- *  deleting a feed should not delete the inventory it produced, and the admin can
- *  still remove individual cars under Vozila. */
+export type ScanState = SourceActionState & { queued?: number };
+
+/** The dashboard's scan button: one dealer when an id is given, otherwise every
+ *  active dealer. Paused dealers stay paused on "all" — pausing one is a
+ *  deliberate choice that a bulk button should not undo; picking a single
+ *  paused dealer does resume it, as "Pokreni" in the dealer list always has. */
+export async function startScan(id?: string | null): Promise<ScanState> {
+  await requireAdmin();
+  if (id) {
+    const source = await prisma.dealerSource.findUnique({ where: { id }, select: { id: true } });
+    if (!source) return { ok: false, error: "Auto kuća nije pronađena" };
+    await prisma.dealerSource.update({
+      where: { id },
+      data: { enabled: true, nextRunAt: new Date() },
+    });
+    revalidatePath(PANEL);
+    revalidatePath("/admin");
+    return { ok: true, queued: 1 };
+  }
+  const { count } = await prisma.dealerSource.updateMany({
+    where: { enabled: true },
+    data: { nextRunAt: new Date() },
+  });
+  if (count === 0) return { ok: false, error: "Nema aktivnih auto kuća" };
+  revalidatePath(PANEL);
+  revalidatePath("/admin");
+  return { ok: true, queued: count };
+}
+
+/** Removes the dealer together with every car it imported and all of their
+ *  photos (each size) in storage. Leads on those cars survive with no car
+ *  attached (Lead.carId is SetNull). */
 export async function deleteSource(id: string): Promise<SourceActionState> {
   await requireAdmin();
-  await prisma.dealerSource.delete({ where: { id } });
+
+  // A sync in flight would keep writing cars for a dealer that no longer
+  // exists. Refuse instead of racing it.
+  const running = await prisma.scrapeRun.findFirst({
+    where: { sourceId: id, status: "RUNNING" },
+    select: { id: true },
+  });
+  if (running) {
+    return {
+      ok: false,
+      error: "Skeniranje ove auto kuće je u tijeku. Pričekajte da završi pa je obrišite.",
+    };
+  }
+
+  const images = await prisma.carImage.findMany({
+    where: { car: { dealerSourceId: id } },
+    select: { key: true, thumbKey: true, mediumKey: true },
+  });
+  const keys = images.flatMap((i) =>
+    [i.key, i.thumbKey, i.mediumKey].filter((k): k is string => !!k),
+  );
+
+  // Rows first, in one transaction (CarImage cascades with Car). If storage
+  // then fails, the photos are orphaned but nothing on the site points at them.
+  await prisma.$transaction([
+    prisma.car.deleteMany({ where: { dealerSourceId: id } }),
+    prisma.dealerSource.delete({ where: { id } }),
+  ]);
+  const { failed } = await deleteObjects(keys);
+  if (failed > 0) console.error(`deleteSource ${id}: ${failed} of ${keys.length} object(s) not deleted`);
+
   revalidatePath(PANEL);
+  revalidatePath("/admin");
+  revalidatePath("/admin/vozila");
   return { ok: true };
 }
